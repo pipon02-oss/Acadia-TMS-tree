@@ -176,50 +176,77 @@ function build(node){
 }
 
 // ── lines ─────────────────────
-function drawLines(){
-  svgEl.innerHTML='';
+function drawLines() {
+  svgEl.innerHTML = '';
 
   const wrapRect = canvasWrap.getBoundingClientRect();
   const sx = canvasWrap.scrollLeft;
   const sy = canvasWrap.scrollTop;
 
-  function edge(n){
-    const pEl = domMap.get(n.id);
-    if (!pEl) return;
+  function getRect(node) {
+    const el = domMap.get(node.id);
+    if (!el) return null;
 
-    const p = pEl.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
 
-    n.children.forEach(c=>{
-      const cEl = domMap.get(c.id);
-      if (!cEl) return;
-
-      const ch = cEl.getBoundingClientRect();
-
-      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-
-      // ✅ FIX: convert to canvas-relative coordinates
-      const x1 = p.left - wrapRect.left + p.width/2 + sx;
-      const y1 = p.bottom - wrapRect.top + sy;
-
-      const x2 = ch.left - wrapRect.left + ch.width/2 + sx;
-      const y2 = ch.top - wrapRect.top + sy;
-
-      line.setAttribute('x1', x1);
-      line.setAttribute('y1', y1);
-      line.setAttribute('x2', x2);
-      line.setAttribute('y2', y2);
-
-      line.setAttribute('stroke','#94a3b8');
-      line.setAttribute('stroke-width','2');
-      line.setAttribute('stroke-linecap','round');
-
-      svgEl.appendChild(line);
-
-      edge(c);
-    });
+    return {
+      cx: r.left - wrapRect.left + r.width / 2 + sx,
+      top: r.top - wrapRect.top + sy,
+      bot: r.bottom - wrapRect.top + sy
+    };
   }
 
-  edge(root);
+  function drawEdges(node) {
+    if (!node.children.length) return;
+
+    const pr = getRect(node);
+    if (!pr) return;
+
+    const childrenRects = node.children
+      .map(c => getRect(c))
+      .filter(Boolean);
+
+    if (!childrenRects.length) return;
+
+    const midY = pr.bot + (childrenRects[0].top - pr.bot) / 2;
+
+    // ── vertical line down from parent
+    seg(pr.cx, pr.bot, pr.cx, midY);
+
+    if (childrenRects.length === 1) {
+      // single child → straight line
+      seg(pr.cx, midY, childrenRects[0].cx, childrenRects[0].top);
+    } else {
+      // ── horizontal connector (clean split line)
+      seg(
+        childrenRects[0].cx,
+        midY,
+        childrenRects[childrenRects.length - 1].cx,
+        midY
+      );
+
+      // ── vertical drops to each child
+      childrenRects.forEach(cr => {
+        seg(cr.cx, midY, cr.cx, cr.top);
+      });
+    }
+
+    node.children.forEach(drawEdges);
+  }
+
+  drawEdges(root);
+}
+
+function seg(x1, y1, x2, y2) {
+  const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  l.setAttribute('x1', x1);
+  l.setAttribute('y1', y1);
+  l.setAttribute('x2', x2);
+  l.setAttribute('y2', y2);
+  l.setAttribute('stroke', '#94a3b8');
+  l.setAttribute('stroke-width', '2');
+  l.setAttribute('stroke-linecap', 'round');
+  svgEl.appendChild(l);
 }
 // ── EXPORT (clean, no DOM duplication) ─────────────────────
 function getCleanHTML(){
