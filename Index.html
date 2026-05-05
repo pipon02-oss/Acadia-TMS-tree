@@ -1,0 +1,278 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMS Project Tree</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; min-height: 100vh; padding: 30px 20px; }
+
+  h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
+  .subtitle { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 14px; }
+  .subtitle span { margin: 0 10px; }
+
+  #toolbar { text-align: center; margin-bottom: 24px; }
+  #btn-save {
+    background: #1e3a5f; color: #fff; border: none; border-radius: 8px;
+    padding: 9px 22px; font-size: 14px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: background 0.15s;
+  }
+  #btn-save:hover { background: #2563eb; }
+  #save-msg { display:inline-block; margin-left:12px; font-size:13px; color:#16a34a; opacity:0; transition: opacity 0.4s; }
+
+  #canvas-wrap { position: relative; overflow: auto; }
+  #svg-layer   { position: absolute; top: 0; left: 0; pointer-events: none; overflow: visible; }
+  #nodes-layer { position: relative; }
+
+  .node {
+    position: absolute;
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 10px; padding: 8px 13px;
+    font-weight: 600; font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+  .lv0 { background:#1e3a5f; color:#fff; font-size:16px; padding:10px 20px; }
+  .lv1 { background:#2563eb; color:#fff; }
+  .lv2 { background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
+  .lv3 { background:#f0fdf4; color:#166534; border:2px solid #4ade80; font-weight:500; }
+  .lv4 { background:#fefce8; color:#713f12; border:2px solid #facc15; font-weight:500; }
+
+  .node-input {
+    border: none; outline: none; background: transparent;
+    color: inherit; font: inherit; text-align: center; min-width: 30px;
+  }
+  .node-input:focus { border-bottom: 1px dashed rgba(255,255,255,0.5); }
+  .lv2 .node-input:focus, .lv3 .node-input:focus, .lv4 .node-input:focus { border-bottom-color: #3b82f6; }
+
+  .btn { background:none; border:none; cursor:pointer; font-size:14px; padding:1px 3px; border-radius:4px; line-height:1; opacity:0.7; }
+  .btn:hover { opacity:1; }
+  .btn-add { color:#86efac; }
+  .lv2 .btn-add, .lv3 .btn-add, .lv4 .btn-add { color:#2563eb; }
+  .btn-del { color:#fca5a5; }
+  .lv2 .btn-del, .lv3 .btn-del, .lv4 .btn-del { color:#ef4444; }
+</style>
+</head>
+<body>
+
+<h1>📋 TMS Project Tree</h1>
+<div class="subtitle">
+  <span>✏️ Click label to rename</span>
+  <span>➕ add child</span>
+  <span>🗑️ delete node</span>
+</div>
+
+<div id="toolbar">
+  <button id="btn-save">💾 Save as file</button>
+  <span id="save-msg" style="opacity: 0;">✓ Saved!</span>
+</div>
+
+<div id="canvas-wrap" style="height: 404px;">
+  <svg id="svg-layer" width="1210.962890625" height="400"><line x1="605.46875" y1="41" x2="605.46875" y2="60.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="244.296875" y1="60.5" x2="1025.6875" y2="60.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="244.296875" y1="60.5" x2="244.296875" y2="80" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="664.515625" y1="60.5" x2="664.515625" y2="80" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="1025.6875" y1="60.5" x2="1025.6875" y2="80" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="244.296875" y1="115" x2="244.296875" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="137.5" x2="327.515625" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="137.5" x2="143.21875" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="327.515625" y1="137.5" x2="327.515625" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="199" x2="143.21875" y2="219.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="219.5" x2="143.21875" y2="240" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="664.515625" y1="115" x2="664.515625" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="137.5" x2="817.921875" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="137.5" x2="511.828125" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="665.234375" y1="137.5" x2="665.234375" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="817.921875" y1="137.5" x2="817.921875" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="199" x2="511.828125" y2="219.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="219.5" x2="511.828125" y2="240" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line></svg>
+  <div id="nodes-layer" style="width: 1210.96px; height: 400px;"><div class="node lv0" style="left: 605.481px; top: 0px;"><input class="node-input" style="width: 34px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete" style="display: none;">×</button></div><div class="node lv1" style="left: 244.305px; top: 80px;"><input class="node-input" style="width: 63px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 143.223px; top: 160px;"><input class="node-input" style="width: 57px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 327.528px; top: 160px;"><input class="node-input" style="width: 114px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv1" style="left: 664.522px; top: 80px;"><input class="node-input" style="width: 44px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 511.833px; top: 160px;"><input class="node-input" style="width: 57px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 665.244px; top: 160px;"><input class="node-input" style="width: 52px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv3" style="left: 143.223px; top: 240px;"><input class="node-input" style="width: 78px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv3" style="left: 511.833px; top: 240px;"><input class="node-input" style="width: 78px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 817.933px; top: 160px;"><input class="node-input" style="width: 77px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv1" style="left: 1025.7px; top: 80px;"><input class="node-input" style="width: 163px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div></div>
+</div>
+
+<script id="tree-data-script">
+// TREE_DATA_START
+const root = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[{"id":100,"label":"Onboarding","children":[]}]},{"id":5,"label":"Planning/projects","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":101,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":102,"label":"Dashboards","children":[]}]},{"id":104,"label":"Technical Documentation","children":[]}]};
+// TREE_DATA_END
+</script>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const V_GAP = 80;
+const H_GAP = 40;
+const PAD   = 80;
+
+let uid = 100;
+
+const svgEl      = document.getElementById('svg-layer');
+const nodesLayer = document.getElementById('nodes-layer');
+const canvasWrap = document.getElementById('canvas-wrap');
+const domMap     = new Map();
+
+// ── Data helpers ──────────────────────────────────────────────────────────────
+function deleteById(node, id) {
+  node.children = node.children.filter(c => c.id !== id);
+  node.children.forEach(c => deleteById(c, id));
+}
+function traverse(node, fn) { fn(node); node.children.forEach(c => traverse(c, fn)); }
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+const _ctx = document.createElement('canvas').getContext('2d');
+function textWidth(label, level) {
+  _ctx.font = `600 ${level === 0 ? 16 : 14}px Segoe UI, Tahoma, sans-serif`;
+  return _ctx.measureText(label).width + (level === 0 ? 60 : 50);
+}
+function calcSubtreeWidth(node, level) {
+  node._level = level;
+  node._ownW  = textWidth(node.label, level);
+  if (!node.children.length) { node._subtreeW = node._ownW; return; }
+  node.children.forEach(c => calcSubtreeWidth(c, level + 1));
+  const span = node.children.reduce((s, c) => s + c._subtreeW, 0) + H_GAP * (node.children.length - 1);
+  node._subtreeW = Math.max(node._ownW, span);
+}
+function assignXY(node, cx, y) {
+  node._x = cx; node._y = y;
+  if (!node.children.length) return;
+  const span = node.children.reduce((s, c) => s + c._subtreeW, 0) + H_GAP * (node.children.length - 1);
+  let x = cx - span / 2;
+  node.children.forEach(c => { assignXY(c, x + c._subtreeW / 2, y + V_GAP); x += c._subtreeW + H_GAP; });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  calcSubtreeWidth(root, 0);
+  assignXY(root, 0, 0);
+
+  let minX = Infinity, maxX = -Infinity, maxY = -Infinity;
+  traverse(root, n => {
+    minX = Math.min(minX, n._x - n._subtreeW / 2);
+    maxX = Math.max(maxX, n._x + n._subtreeW / 2);
+    maxY = Math.max(maxY, n._y);
+  });
+  const shiftX = PAD - minX;
+  traverse(root, n => { n._x += shiftX; });
+
+  const totalW = maxX - minX + PAD * 2;
+  const totalH = maxY + 80 + PAD;
+
+  nodesLayer.style.width  = totalW + 'px';
+  nodesLayer.style.height = totalH + 'px';
+  svgEl.setAttribute('width',  totalW);
+  svgEl.setAttribute('height', totalH);
+  canvasWrap.style.height = (totalH + 4) + 'px';
+
+  const seen = new Set();
+  traverse(root, node => {
+    seen.add(node.id);
+    let entry = domMap.get(node.id);
+    if (!entry) {
+      const el = buildEl(node);
+      nodesLayer.appendChild(el);
+      entry = { el, node };
+      domMap.set(node.id, entry);
+    }
+    const { el } = entry;
+    const inp = el.querySelector('.node-input');
+    if (document.activeElement !== inp) { inp.value = node.label; autoWidth(inp); }
+    el.className = `node lv${Math.min(node._level, 4)}`;
+    const del = el.querySelector('.btn-del');
+    if (del) del.style.display = node.id === root.id ? 'none' : '';
+    el.style.left = node._x + 'px';
+    el.style.top  = node._y + 'px';
+  });
+
+  domMap.forEach((entry, id) => { if (!seen.has(id)) { entry.el.remove(); domMap.delete(id); } });
+  requestAnimationFrame(() => requestAnimationFrame(drawLines));
+}
+
+function buildEl(node) {
+  const el = document.createElement('div');
+  const inp = document.createElement('input');
+  inp.className = 'node-input';
+  inp.value = node.label;
+  autoWidth(inp);
+  inp.addEventListener('input', () => { node.label = inp.value; autoWidth(inp); render(); });
+
+  const btnAdd = document.createElement('button');
+  btnAdd.className = 'btn btn-add'; btnAdd.textContent = '＋'; btnAdd.title = 'Add child';
+  btnAdd.addEventListener('click', () => {
+    node.children.push({ id: uid++, label: 'New Item', children: [] });
+    render();
+    setTimeout(() => { const all = document.querySelectorAll('.node-input'); all[all.length-1]?.focus(); }, 40);
+  });
+
+  const btnDel = document.createElement('button');
+  btnDel.className = 'btn btn-del'; btnDel.textContent = '×'; btnDel.title = 'Delete';
+  btnDel.addEventListener('click', () => { if (node.id === root.id) return; deleteById(root, node.id); render(); });
+
+  el.append(inp, btnAdd, btnDel);
+  return el;
+}
+
+function autoWidth(inp) { inp.style.width = '0'; inp.style.width = (inp.scrollWidth + 2) + 'px'; }
+
+// ── SVG connectors (reads real DOM positions) ─────────────────────────────────
+function drawLines() {
+  svgEl.innerHTML = '';
+  const wrapRect = canvasWrap.getBoundingClientRect();
+  const sx = canvasWrap.scrollLeft, sy = canvasWrap.scrollTop;
+
+  function getRect(node) {
+    const el = domMap.get(node.id)?.el;
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return {
+      cx:  r.left - wrapRect.left + r.width / 2 + sx,
+      top: r.top  - wrapRect.top               + sy,
+      bot: r.top  - wrapRect.top  + r.height   + sy,
+    };
+  }
+
+  function drawEdges(node) {
+    if (!node.children.length) return;
+    const pr = getRect(node); if (!pr) return;
+    const crs = node.children.map(getRect).filter(Boolean);
+    if (!crs.length) return;
+    const midY = pr.bot + (crs[0].top - pr.bot) / 2;
+    seg(pr.cx, pr.bot, pr.cx, midY);
+    if (crs.length === 1) {
+      seg(pr.cx, midY, crs[0].cx, crs[0].top);
+    } else {
+      seg(crs[0].cx, midY, crs[crs.length-1].cx, midY);
+      crs.forEach(cr => seg(cr.cx, midY, cr.cx, cr.top));
+    }
+    node.children.forEach(drawEdges);
+  }
+  drawEdges(root);
+}
+
+function seg(x1, y1, x2, y2) {
+  const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+  l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+  l.setAttribute('stroke', '#94a3b8'); l.setAttribute('stroke-width', '2');
+  l.setAttribute('stroke-linecap', 'round');
+  svgEl.appendChild(l);
+}
+
+// ── Save: serialize current tree into a new HTML file ────────────────────────
+document.getElementById('btn-save').addEventListener('click', () => {
+  // Get this page's full HTML source
+  const source = document.documentElement.outerHTML;
+
+  // Serialize current tree (strip layout keys like _x, _y, etc.)
+  function clean(node) {
+    return { id: node.id, label: node.label, children: node.children.map(clean) };
+  }
+  const treeJson = JSON.stringify(clean(root));
+
+  // Replace the data line between the markers
+  const updated = source.replace(
+    /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
+    `// TREE_DATA_START\nconst root = ${treeJson};\n// TREE_DATA_END`
+  );
+
+  // Download as file
+  const blob = new Blob([updated], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'tms_tree.html';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // Flash confirmation
+  const msg = document.getElementById('save-msg');
+  msg.style.opacity = '1';
+  setTimeout(() => { msg.style.opacity = '0'; }, 2000);
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+render();
+window.addEventListener('resize', render);
+</script>
+
+
+</body></html>
