@@ -18,14 +18,14 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: background 0.15s, transform 0.1s;
   }
   .tool-btn:active { transform: scale(0.97); }
-  #btn-save  { background: #1e3a5f; color: #fff; }
-  #btn-save:hover  { background: #2563eb; }
-  #btn-copy  { background: #fff; color: #1e3a5f; border: 2px solid #3b82f6; }
-  #btn-copy:hover  { background: #eff6ff; }
+  #btn-save { background: #1e3a5f; color: #fff; }
+  #btn-save:hover { background: #2563eb; }
+  #btn-copy { background: #fff; color: #1e3a5f; border: 2px solid #3b82f6; }
+  #btn-copy:hover { background: #eff6ff; }
 
   .flash-msg { font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s; min-width: 90px; }
-  #save-msg  { color: #16a34a; }
-  #copy-msg  { color: #2563eb; }
+  #save-msg { color: #16a34a; }
+  #copy-msg { color: #2563eb; }
 
   #canvas-wrap { position: relative; overflow: auto; }
   #svg-layer   { position: absolute; top: 0; left: 0; pointer-events: none; overflow: visible; }
@@ -74,23 +74,21 @@
   <button class="tool-btn" id="btn-save">💾 Save as file</button>
   <span class="flash-msg" id="save-msg">✓ Downloaded!</span>
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
-  <span class="flash-msg" id="copy-msg" style="opacity: 0;">✓ Copied!</span>
+  <span class="flash-msg" id="copy-msg">✓ Copied!</span>
 </div>
 
-<div id="canvas-wrap" style="height: 404px;">
-  <svg id="svg-layer" width="1210.962890625" height="400"><line x1="605.46875" y1="41" x2="605.46875" y2="60.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="244.296875" y1="60.5" x2="1025.6875" y2="60.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="244.296875" y1="60.5" x2="244.296875" y2="80" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="664.515625" y1="60.5" x2="664.515625" y2="80" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="1025.6875" y1="60.5" x2="1025.6875" y2="80" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="244.296875" y1="115" x2="244.296875" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="137.5" x2="327.515625" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="137.5" x2="143.21875" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="327.515625" y1="137.5" x2="327.515625" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="199" x2="143.21875" y2="219.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="143.21875" y1="219.5" x2="143.21875" y2="240" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="664.515625" y1="115" x2="664.515625" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="137.5" x2="817.921875" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="137.5" x2="511.828125" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="665.234375" y1="137.5" x2="665.234375" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="817.921875" y1="137.5" x2="817.921875" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="199" x2="511.828125" y2="219.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="511.828125" y1="219.5" x2="511.828125" y2="240" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="1025.6875" y1="115" x2="1025.6875" y2="137.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="1025.6875" y1="137.5" x2="1025.6875" y2="160" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line></svg>
-  <div id="nodes-layer" style="width: 1210.96px; height: 400px;"><div class="node lv0" style="left: 605.481px; top: 0px;"><input class="node-input" style="width: 34px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete" style="display: none;">×</button></div><div class="node lv1" style="left: 244.305px; top: 80px;"><input class="node-input" style="width: 63px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 143.223px; top: 160px;"><input class="node-input" style="width: 57px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 327.528px; top: 160px;"><input class="node-input" style="width: 114px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv1" style="left: 664.522px; top: 80px;"><input class="node-input" style="width: 44px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 511.833px; top: 160px;"><input class="node-input" style="width: 57px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 665.244px; top: 160px;"><input class="node-input" style="width: 52px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv3" style="left: 143.223px; top: 240px;"><input class="node-input" style="width: 78px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 817.933px; top: 160px;"><input class="node-input" style="width: 77px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv1" style="left: 1025.7px; top: 80px;"><input class="node-input" style="width: 163px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv3" style="left: 511.833px; top: 240px;"><input class="node-input" style="width: 78px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 1025.7px; top: 160px;"><input class="node-input" style="width: 70px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div></div>
+<div id="canvas-wrap" style="height: 434px;">
+  <svg id="svg-layer" width="1239.716796875" height="430"><line x1="619.84375" y1="41" x2="619.84375" y2="65.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="238.671875" y1="65.5" x2="1054.4375" y2="65.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="238.671875" y1="65.5" x2="238.671875" y2="90" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="673.265625" y1="65.5" x2="673.265625" y2="90" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="1054.4375" y1="65.5" x2="1054.4375" y2="90" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="238.671875" y1="125" x2="238.671875" y2="152.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="132.59375" y1="152.5" x2="316.28125" y2="152.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="132.59375" y1="152.5" x2="132.59375" y2="180" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="316.28125" y1="152.5" x2="316.28125" y2="180" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="673.265625" y1="125" x2="673.265625" y2="152.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="510.578125" y1="152.5" x2="836.671875" y2="152.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="510.578125" y1="152.5" x2="510.578125" y2="180" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="673.984375" y1="152.5" x2="673.984375" y2="180" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="836.671875" y1="152.5" x2="836.671875" y2="180" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="510.578125" y1="219" x2="510.578125" y2="244.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="510.578125" y1="244.5" x2="510.578125" y2="270" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line></svg>
+  <div id="nodes-layer" style="width: 1239.72px; height: 430px;"><div class="node lv0" style="left: 619.858px; top: 0px;"><input class="node-input" style="width: 33px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete" style="display: none;">×</button></div><div class="node lv1" style="left: 238.682px; top: 90px;"><input class="node-input" style="width: 68px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 132.6px; top: 180px;"><input class="node-input" style="width: 63px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 316.282px; top: 180px;"><input class="node-input" style="width: 126px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv1" style="left: 673.276px; top: 90px;"><input class="node-input" style="width: 48px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 510.587px; top: 180px;"><input class="node-input" style="width: 63px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv3" style="left: 510.587px; top: 270px;"><input class="node-input" style="width: 87px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 673.998px; top: 180px;"><input class="node-input" style="width: 58px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv2" style="left: 836.687px; top: 180px;"><input class="node-input" style="width: 86px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div><div class="node lv1" style="left: 1054.45px; top: 90px;"><input class="node-input" style="width: 180px;"><button class="btn btn-add" title="Add child">＋</button><button class="btn btn-del" title="Delete">×</button></div></div>
 </div>
-
-<script id="tree-data-script">
-// TREE_DATA_START
-const root = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[{"id":100,"label":"Onboarding","children":[]}]},{"id":5,"label":"Planning/projects","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":103,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":101,"label":"Dashboards","children":[]}]},{"id":102,"label":"Technical Documentation","children":[{"id":104,"label":"New Item","children":[]}]}]};
-// TREE_DATA_END
-</script>
 
 <script>
-const V_GAP = 80, H_GAP = 40, PAD = 80;
-let uid = 100;
+// TREE_DATA_START
+const root = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[]},{"id":5,"label":"Planning/projects","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":10,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":8,"label":"Dashboards","children":[]}]},{"id":9,"label":"Technical Documentation","children":[]}]};
+// TREE_DATA_END
+
+const V_GAP = 90, H_GAP = 50, PAD = 80;
+let uid = 200;
 
 const svgEl      = document.getElementById('svg-layer');
 const nodesLayer = document.getElementById('nodes-layer');
@@ -171,6 +169,8 @@ function render() {
   });
 
   domMap.forEach((entry, id) => { if (!seen.has(id)) { entry.el.remove(); domMap.delete(id); } });
+
+  // Two rAF frames to ensure DOM has fully painted before reading rects
   requestAnimationFrame(() => requestAnimationFrame(drawLines));
 }
 
@@ -187,7 +187,7 @@ function buildEl(node) {
   btnAdd.addEventListener('click', () => {
     node.children.push({ id: uid++, label: 'New Item', children: [] });
     render();
-    setTimeout(() => { const all = document.querySelectorAll('.node-input'); all[all.length-1]?.focus(); }, 40);
+    setTimeout(() => { const all = document.querySelectorAll('.node-input'); all[all.length-1]?.focus(); }, 60);
   });
 
   const btnDel = document.createElement('button');
@@ -200,7 +200,7 @@ function buildEl(node) {
 
 function autoWidth(inp) { inp.style.width = '0'; inp.style.width = (inp.scrollWidth + 2) + 'px'; }
 
-// ── SVG connectors ────────────────────────────────────────────────────────────
+// ── SVG connectors — reads REAL bounding rects after paint ───────────────────
 function drawLines() {
   svgEl.innerHTML = '';
   const wrapRect = canvasWrap.getBoundingClientRect();
@@ -220,18 +220,27 @@ function drawLines() {
   function drawEdges(node) {
     if (!node.children.length) return;
     const pr = getRect(node); if (!pr) return;
-    const crs = node.children.map(getRect).filter(Boolean);
+    const crs = node.children.map(c => getRect(c)).filter(Boolean);
     if (!crs.length) return;
+
     const midY = pr.bot + (crs[0].top - pr.bot) / 2;
+
+    // vertical stem down from parent
     seg(pr.cx, pr.bot, pr.cx, midY);
+
     if (crs.length === 1) {
       seg(pr.cx, midY, crs[0].cx, crs[0].top);
     } else {
-      seg(crs[0].cx, midY, crs[crs.length-1].cx, midY);
+      // horizontal bar only between first and last child of THIS node
+      seg(crs[0].cx, midY, crs[crs.length - 1].cx, midY);
+      // vertical drop to each child
       crs.forEach(cr => seg(cr.cx, midY, cr.cx, cr.top));
     }
+
+    // recurse — each node draws only its own children's connectors
     node.children.forEach(drawEdges);
   }
+
   drawEdges(root);
 }
 
@@ -244,7 +253,7 @@ function seg(x1, y1, x2, y2) {
   svgEl.appendChild(l);
 }
 
-// ── Generate updated HTML string ──────────────────────────────────────────────
+// ── Generate updated HTML ─────────────────────────────────────────────────────
 function getUpdatedHTML() {
   const treeJson = JSON.stringify(clean(root));
   return document.documentElement.outerHTML.replace(
@@ -277,6 +286,7 @@ function flash(id) {
 // ── Boot ──────────────────────────────────────────────────────────────────────
 render();
 window.addEventListener('resize', render);
+canvasWrap.addEventListener('scroll', drawLines);
 </script>
 
 
