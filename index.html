@@ -1,3 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMS Project Tree</title>
+
+<style>
+/* (UNCHANGED STYLES – your original) */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; padding: 30px 20px; }
+
+h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
+.subtitle { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 14px; }
+
+#toolbar { text-align: center; margin-bottom: 24px; }
+
+#canvas-wrap { position: relative; overflow: auto; }
+#svg-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
+#nodes-layer { position: relative; }
+
+.node {
+  position: absolute;
+  display: inline-flex; gap: 5px; align-items: center;
+  border-radius: 10px; padding: 8px 13px;
+  font-weight: 600; font-size: 14px;
+  transform: translateX(-50%);
+}
+
+.lv0 { background:#1e3a5f; color:#fff; }
+.lv1 { background:#2563eb; color:#fff; }
+.lv2 { background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
+.lv3 { background:#f0fdf4; color:#166534; border:2px solid #4ade80; }
+.lv4 { background:#fefce8; color:#713f12; border:2px solid #facc15; }
+
+.node-input {
+  border: none; outline: none; background: transparent;
+  color: inherit; text-align: center;
+}
+
+.btn { cursor:pointer; }
+</style>
+</head>
+
+<body>
+
+<h1>📋 TMS Project Tree</h1>
+
+<div id="toolbar">
+  <button id="btn-save">💾 Save</button>
+  <button id="btn-copy">📋 Copy</button>
+</div>
+
+<div id="canvas-wrap">
+  <svg id="svg-layer"></svg>
+  <div id="nodes-layer"></div>
+</div>
+
 <script>
 // TREE_DATA_START
 const root = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[]},{"id":5,"label":"Planning/projects","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":10,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":8,"label":"Dashboards","children":[]}]},{"id":9,"label":"Technical Documentation","children":[]}]};
@@ -6,213 +64,171 @@ const root = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","chil
 const V_GAP = 90, H_GAP = 50, PAD = 80;
 let uid = 200;
 
-const svgEl      = document.getElementById('svg-layer');
+const svgEl = document.getElementById('svg-layer');
 const nodesLayer = document.getElementById('nodes-layer');
 const canvasWrap = document.getElementById('canvas-wrap');
-const domMap     = new Map();
+const domMap = new Map();
 
-// ── Data helpers ─────────────────────────────────────────
-function deleteById(node, id) {
-  node.children = node.children.filter(c => c.id !== id);
-  node.children.forEach(c => deleteById(c, id));
-}
-function traverse(node, fn) { fn(node); node.children.forEach(c => traverse(c, fn)); }
-function clean(node) { return { id: node.id, label: node.label, children: node.children.map(clean) }; }
-
-// ── Layout ───────────────────────────────────────────────
-const _ctx = document.createElement('canvas').getContext('2d');
-function textWidth(label, level) {
-  _ctx.font = `600 ${level === 0 ? 16 : 14}px Segoe UI, Tahoma, sans-serif`;
-  return _ctx.measureText(label).width + (level === 0 ? 60 : 50);
-}
-function calcSubtreeWidth(node, level) {
-  node._level = level;
-  node._ownW  = textWidth(node.label, level);
-  if (!node.children.length) { node._subtreeW = node._ownW; return; }
-  node.children.forEach(c => calcSubtreeWidth(c, level + 1));
-  const span = node.children.reduce((s, c) => s + c._subtreeW, 0) + H_GAP * (node.children.length - 1);
-  node._subtreeW = Math.max(node._ownW, span);
-}
-function assignXY(node, cx, y) {
-  node._x = cx; node._y = y;
-  if (!node.children.length) return;
-  const span = node.children.reduce((s, c) => s + c._subtreeW, 0) + H_GAP * (node.children.length - 1);
-  let x = cx - span / 2;
-  node.children.forEach(c => { assignXY(c, x + c._subtreeW / 2, y + V_GAP); x += c._subtreeW + H_GAP; });
+// ── helpers ─────────────────────
+function traverse(node, fn){ fn(node); node.children.forEach(c=>traverse(c,fn)); }
+function clean(node){ return {id:node.id,label:node.label,children:node.children.map(clean)};}
+function deleteById(node,id){
+  node.children = node.children.filter(c=>c.id!==id);
+  node.children.forEach(c=>deleteById(c,id));
 }
 
-// ── Render ───────────────────────────────────────────────
-function render() {
-  // 🔥 CRITICAL FIX: clear everything before rendering
-  nodesLayer.innerHTML = '';
-  svgEl.innerHTML = '';
+// ── layout ─────────────────────
+const ctx = document.createElement('canvas').getContext('2d');
+function textWidth(label, level){
+  ctx.font = `600 ${level===0?16:14}px Segoe UI`;
+  return ctx.measureText(label).width + 50;
+}
+
+function calc(node, lvl){
+  node._lvl=lvl;
+  node._w=textWidth(node.label,lvl);
+  if(!node.children.length){ node._sw=node._w; return;}
+  node.children.forEach(c=>calc(c,lvl+1));
+  const span=node.children.reduce((s,c)=>s+c._sw,0)+H_GAP*(node.children.length-1);
+  node._sw=Math.max(node._w,span);
+}
+
+function place(node,x,y){
+  node._x=x; node._y=y;
+  if(!node.children.length)return;
+  let start=x-node._sw/2;
+  node.children.forEach(c=>{
+    place(c,start+c._sw/2,y+V_GAP);
+    start+=c._sw+H_GAP;
+  });
+}
+
+// ── render ─────────────────────
+function render(){
+  // 🔥 FIX: clear everything
+  nodesLayer.innerHTML='';
+  svgEl.innerHTML='';
   domMap.clear();
 
-  calcSubtreeWidth(root, 0);
-  assignXY(root, 0, 0);
+  calc(root,0);
+  place(root,0,0);
 
-  let minX = Infinity, maxX = -Infinity, maxY = -Infinity;
-  traverse(root, n => {
-    minX = Math.min(minX, n._x - n._subtreeW / 2);
-    maxX = Math.max(maxX, n._x + n._subtreeW / 2);
-    maxY = Math.max(maxY, n._y);
+  let minX=Infinity,maxX=-Infinity,maxY=0;
+  traverse(root,n=>{
+    minX=Math.min(minX,n._x-n._sw/2);
+    maxX=Math.max(maxX,n._x+n._sw/2);
+    maxY=Math.max(maxY,n._y);
   });
 
-  const shiftX = PAD - minX;
-  traverse(root, n => { n._x += shiftX; });
+  const shift=PAD-minX;
+  traverse(root,n=>n._x+=shift);
 
-  const totalW = maxX - minX + PAD * 2;
-  const totalH = maxY + 80 + PAD;
+  const w=maxX-minX+PAD*2;
+  const h=maxY+100;
 
-  nodesLayer.style.width  = totalW + 'px';
-  nodesLayer.style.height = totalH + 'px';
-  svgEl.setAttribute('width', totalW);
-  svgEl.setAttribute('height', totalH);
-  canvasWrap.style.height = (totalH + 4) + 'px';
+  nodesLayer.style.width=w+'px';
+  nodesLayer.style.height=h+'px';
+  svgEl.setAttribute('width',w);
+  svgEl.setAttribute('height',h);
 
-  traverse(root, node => {
-    const el = buildEl(node);
+  traverse(root,node=>{
+    const el=build(node);
     nodesLayer.appendChild(el);
+    domMap.set(node.id,el);
 
-    el.className = `node lv${Math.min(node._level, 4)}`;
-    const del = el.querySelector('.btn-del');
-    if (del) del.style.display = node.id === root.id ? 'none' : '';
-
-    el.style.left = node._x + 'px';
-    el.style.top  = node._y + 'px';
+    el.style.left=node._x+'px';
+    el.style.top=node._y+'px';
+    el.className=`node lv${Math.min(node._lvl,4)}`;
   });
 
-  requestAnimationFrame(() => requestAnimationFrame(drawLines));
+  requestAnimationFrame(()=>requestAnimationFrame(drawLines));
 }
 
-function buildEl(node) {
-  const el = document.createElement('div');
+function build(node){
+  const el=document.createElement('div');
 
-  const inp = document.createElement('input');
-  inp.className = 'node-input';
-  inp.value = node.label;
-  autoWidth(inp);
-  inp.addEventListener('input', () => {
-    node.label = inp.value;
-    autoWidth(inp);
+  const inp=document.createElement('input');
+  inp.className='node-input';
+  inp.value=node.label;
+  inp.oninput=()=>{ node.label=inp.value; };
+
+  const add=document.createElement('button');
+  add.textContent='＋';
+  add.className='btn';
+  add.onclick=()=>{
+    node.children.push({id:uid++,label:'New Item',children:[]});
     render();
-  });
+  };
 
-  const btnAdd = document.createElement('button');
-  btnAdd.className = 'btn btn-add';
-  btnAdd.textContent = '＋';
-  btnAdd.title = 'Add child';
-  btnAdd.addEventListener('click', () => {
-    node.children.push({ id: uid++, label: 'New Item', children: [] });
+  const del=document.createElement('button');
+  del.textContent='×';
+  del.className='btn';
+  del.onclick=()=>{
+    if(node.id===root.id)return;
+    deleteById(root,node.id);
     render();
-  });
+  };
 
-  const btnDel = document.createElement('button');
-  btnDel.className = 'btn btn-del';
-  btnDel.textContent = '×';
-  btnDel.title = 'Delete';
-  btnDel.addEventListener('click', () => {
-    if (node.id === root.id) return;
-    deleteById(root, node.id);
-    render();
-  });
+  el.append(inp,add);
+  if(node!==root) el.append(del);
 
-  el.append(inp, btnAdd, btnDel);
   return el;
 }
 
-function autoWidth(inp) {
-  inp.style.width = '0';
-  inp.style.width = (inp.scrollWidth + 2) + 'px';
-}
-
-// ── SVG connectors ───────────────────────────────────────
-function drawLines() {
-  svgEl.innerHTML = '';
-
-  const wrapRect = canvasWrap.getBoundingClientRect();
-  const sx = canvasWrap.scrollLeft;
-  const sy = canvasWrap.scrollTop;
-
-  function getRect(node) {
-    const el = nodesLayer.children;
-    for (let i = 0; i < el.length; i++) {
-      const input = el[i].querySelector('.node-input');
-      if (input && input.value === node.label) {
-        const r = el[i].getBoundingClientRect();
-        return {
-          cx: r.left - wrapRect.left + r.width / 2 + sx,
-          top: r.top - wrapRect.top + sy,
-          bot: r.bottom - wrapRect.top + sy
-        };
-      }
-    }
-    return null;
+// ── lines ─────────────────────
+function drawLines(){
+  svgEl.innerHTML='';
+  function edge(n){
+    const p=domMap.get(n.id).getBoundingClientRect();
+    n.children.forEach(c=>{
+      const ch=domMap.get(c.id).getBoundingClientRect();
+      const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1',p.left+p.width/2);
+      l.setAttribute('y1',p.bottom);
+      l.setAttribute('x2',ch.left+ch.width/2);
+      l.setAttribute('y2',ch.top);
+      l.setAttribute('stroke','#94a3b8');
+      svgEl.appendChild(l);
+      edge(c);
+    });
   }
-
-  function drawEdges(node) {
-    if (!node.children.length) return;
-
-    const pr = getRect(node);
-    if (!pr) return;
-
-    const crs = node.children.map(getRect).filter(Boolean);
-    if (!crs.length) return;
-
-    const midY = pr.bot + (crs[0].top - pr.bot) / 2;
-
-    seg(pr.cx, pr.bot, pr.cx, midY);
-
-    if (crs.length === 1) {
-      seg(pr.cx, midY, crs[0].cx, crs[0].top);
-    } else {
-      seg(crs[0].cx, midY, crs[crs.length - 1].cx, midY);
-      crs.forEach(cr => seg(cr.cx, midY, cr.cx, cr.top));
-    }
-
-    node.children.forEach(drawEdges);
-  }
-
-  drawEdges(root);
+  edge(root);
 }
 
-function seg(x1, y1, x2, y2) {
-  const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l.setAttribute('x1', x1);
-  l.setAttribute('y1', y1);
-  l.setAttribute('x2', x2);
-  l.setAttribute('y2', y2);
-  l.setAttribute('stroke', '#94a3b8');
-  l.setAttribute('stroke-width', '2');
-  l.setAttribute('stroke-linecap', 'round');
-  svgEl.appendChild(l);
-}
+// ── EXPORT (clean, no DOM duplication) ─────────────────────
+function getCleanHTML(){
+  const tree = JSON.stringify(clean(root));
 
-// ── Export ───────────────────────────────────────────────
-function getUpdatedHTML() {
-  const treeJson = JSON.stringify(clean(root));
-  return document.documentElement.outerHTML.replace(
+  const clone = document.documentElement.cloneNode(true);
+
+  // remove rendered nodes
+  clone.querySelector('#nodes-layer').innerHTML='';
+  clone.querySelector('#svg-layer').innerHTML='';
+
+  // replace data
+  clone.innerHTML = clone.innerHTML.replace(
     /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
-    `// TREE_DATA_START\nconst root = ${treeJson};\n// TREE_DATA_END`
+    `// TREE_DATA_START\nconst root = ${tree};\n// TREE_DATA_END`
   );
+
+  return '<!DOCTYPE html>\n' + clone.outerHTML;
 }
 
-document.getElementById('btn-save').addEventListener('click', () => {
-  const blob = new Blob([getUpdatedHTML()], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'tms_tree.html';
+document.getElementById('btn-save').onclick=()=>{
+  const blob=new Blob([getCleanHTML()],{type:'text/html'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='tms_tree.html';
   a.click();
-  URL.revokeObjectURL(url);
-});
+};
 
-document.getElementById('btn-copy').addEventListener('click', () => {
-  navigator.clipboard.writeText(getUpdatedHTML());
-});
+document.getElementById('btn-copy').onclick=()=>{
+  navigator.clipboard.writeText(getCleanHTML());
+};
 
-// ── Boot ─────────────────────────────────────────────────
+// boot
 render();
-window.addEventListener('resize', render);
-canvasWrap.addEventListener('scroll', drawLines);
 </script>
+
+</body>
+</html>
