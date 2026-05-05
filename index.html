@@ -1,287 +1,359 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TMS Project Tree</title>
-
 <style>
-/* (UNCHANGED STYLES – your original) */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; padding: 30px 20px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f4f8; min-height: 100vh; padding: 30px 20px; }
 
-h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
-.subtitle { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 14px; }
+  h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
+  .subtitle { text-align: center; font-size: 12px; color: #64748b; margin-bottom: 14px; }
+  .subtitle span { margin: 0 10px; }
 
-#toolbar { text-align: center; margin-bottom: 24px; }
+  #toolbar {
+    text-align: center; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  }
+  .tool-btn {
+    border: none; border-radius: 8px; padding: 9px 20px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: background 0.15s;
+  }
+  #btn-save { background: #1e3a5f; color: #fff; }
+  #btn-save:hover { background: #2563eb; }
+  #btn-copy { background: #fff; color: #1e3a5f; border: 2px solid #3b82f6; }
+  #btn-copy:hover { background: #eff6ff; }
+  .flash { font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
+  #save-msg { color: #16a34a; }
+  #copy-msg { color: #2563eb; }
 
-#canvas-wrap { position: relative; overflow: auto; }
-#svg-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
-#nodes-layer { position: relative; }
+  #canvas-wrap { position: relative; overflow: auto; }
+  #svg-layer   { position: absolute; top: 0; left: 0; pointer-events: none; }
+  #nodes-layer { position: relative; }
 
-.node {
-  position: absolute;
-  display: inline-flex; gap: 5px; align-items: center;
-  border-radius: 10px; padding: 8px 13px;
-  font-weight: 600; font-size: 14px;
-  transform: translateX(-50%);
-}
+  .node {
+    position: absolute; transform: translateX(-50%);
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 10px; padding: 8px 13px;
+    font-weight: 600; font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12); white-space: nowrap;
+  }
+  .lv0 { background:#1e3a5f; color:#fff; font-size:16px; padding:10px 20px; }
+  .lv1 { background:#2563eb; color:#fff; }
+  .lv2 { background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
+  .lv3 { background:#f0fdf4; color:#166534; border:2px solid #4ade80; }
+  .lv4 { background:#fefce8; color:#713f12; border:2px solid #facc15; }
 
-.lv0 { background:#1e3a5f; color:#fff; }
-.lv1 { background:#2563eb; color:#fff; }
-.lv2 { background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
-.lv3 { background:#f0fdf4; color:#166534; border:2px solid #4ade80; }
-.lv4 { background:#fefce8; color:#713f12; border:2px solid #facc15; }
+  .node-input {
+    border: none; outline: none; background: transparent;
+    color: inherit; font: inherit; text-align: center; min-width: 30px;
+  }
+  .node-input:focus { border-bottom: 1px dashed rgba(255,255,255,0.4); }
+  .lv2 .node-input:focus, .lv3 .node-input:focus, .lv4 .node-input:focus { border-bottom-color: #3b82f6; }
 
-.node-input {
-  border: none; outline: none; background: transparent;
-  color: inherit; text-align: center;
-}
-
-.btn { cursor:pointer; }
+  .btn { background:none; border:none; cursor:pointer; font-size:13px; padding:1px 3px; border-radius:4px; opacity:0.7; line-height:1; }
+  .btn:hover { opacity:1; }
+  .btn-add { color:#86efac; }
+  .lv2 .btn-add, .lv3 .btn-add, .lv4 .btn-add { color:#2563eb; }
+  .btn-del { color:#fca5a5; }
+  .lv2 .btn-del, .lv3 .btn-del, .lv4 .btn-del { color:#ef4444; }
 </style>
 </head>
-
 <body>
 
 <h1>📋 TMS Project Tree</h1>
-
-<div id="toolbar">
-  <button id="btn-save">💾 Save</button>
-  <button id="btn-copy">📋 Copy</button>
+<div class="subtitle">
+  <span>✏️ Click label to rename</span>
+  <span>➕ add child</span>
+  <span>🗑️ delete node</span>
 </div>
-
-<div id="canvas-wrap">
-  <svg id="svg-layer"></svg>
-  <div id="nodes-layer"></div>
+<div id="toolbar">
+  <button class="tool-btn" id="btn-save">💾 Save as file</button>
+  <span class="flash" id="save-msg">✓ Downloaded!</span>
+  <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
+  <span class="flash" id="copy-msg">✓ Copied!</span>
+</div>
+<div id="canvas-wrap" style="height: 434px;">
+  <svg id="svg-layer" width="1251.716796875" height="430"></svg>
+  <div id="nodes-layer" style="width: 1251.72px; height: 430px;"></div>
 </div>
 
 <script>
+// ── Tree data ─────────────────────────────────────────────────────────────────
 // TREE_DATA_START
-const root = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[]},{"id":5,"label":"Planning/projects","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":10,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":8,"label":"Dashboards","children":[]}]},{"id":9,"label":"Technical Documentation","children":[]}]};
+var treeData = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[]},{"id":5,"label":"Planning/projects","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":10,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":8,"label":"Dashboards","children":[]}]},{"id":9,"label":"Technical Documentation","children":[]}]};
 // TREE_DATA_END
 
-const V_GAP = 90, H_GAP = 50, PAD = 80;
-let uid = 200;
+// ── Settings ──────────────────────────────────────────────────────────────────
+var V_GAP = 90, H_GAP = 50, PAD = 80;
+var nextId = 500;
 
-const svgEl = document.getElementById('svg-layer');
-const nodesLayer = document.getElementById('nodes-layer');
-const canvasWrap = document.getElementById('canvas-wrap');
-const domMap = new Map();
+var svg      = document.getElementById('svg-layer');
+var nodesDiv = document.getElementById('nodes-layer');
+var wrap     = document.getElementById('canvas-wrap');
 
-// ── helpers ─────────────────────
-function traverse(node, fn){ fn(node); node.children.forEach(c=>traverse(c,fn)); }
-function clean(node){ return {id:node.id,label:node.label,children:node.children.map(clean)};}
-function deleteById(node,id){
-  node.children = node.children.filter(c=>c.id!==id);
-  node.children.forEach(c=>deleteById(c,id));
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function cloneData(node) {
+  return { id: node.id, label: node.label, children: node.children.map(cloneData) };
 }
 
-// ── layout ─────────────────────
-const ctx = document.createElement('canvas').getContext('2d');
-function textWidth(label, level){
-  ctx.font = `600 ${level===0?16:14}px Segoe UI`;
-  return ctx.measureText(label).width + 50;
+function findAndDelete(node, id) {
+  node.children = node.children.filter(function(c) { return c.id !== id; });
+  node.children.forEach(function(c) { findAndDelete(c, id); });
 }
 
-function calc(node, lvl){
-  node._lvl=lvl;
-  node._w=textWidth(node.label,lvl);
-  if(!node.children.length){ node._sw=node._w; return;}
-  node.children.forEach(c=>calc(c,lvl+1));
-  const span=node.children.reduce((s,c)=>s+c._sw,0)+H_GAP*(node.children.length-1);
-  node._sw=Math.max(node._w,span);
+function findNode(node, id) {
+  if (node.id === id) return node;
+  for (var i = 0; i < node.children.length; i++) {
+    var found = findNode(node.children[i], id);
+    if (found) return found;
+  }
+  return null;
 }
 
-function place(node,x,y){
-  node._x=x; node._y=y;
-  if(!node.children.length)return;
-  let start=x-node._sw/2;
-  node.children.forEach(c=>{
-    place(c,start+c._sw/2,y+V_GAP);
-    start+=c._sw+H_GAP;
+function allNodes(node, list) {
+  list = list || [];
+  list.push(node);
+  node.children.forEach(function(c) { allNodes(c, list); });
+  return list;
+}
+
+// ── Layout: measure + position ────────────────────────────────────────────────
+var measureCanvas = document.createElement('canvas').getContext('2d');
+
+function measureLabel(label, level) {
+  measureCanvas.font = '600 ' + (level === 0 ? 16 : 14) + 'px Segoe UI, Tahoma, sans-serif';
+  return measureCanvas.measureText(label).width + (level === 0 ? 65 : 52);
+}
+
+function computeWidths(node, level) {
+  node._lv = level;
+  node._ow = measureLabel(node.label, level);
+  if (node.children.length === 0) {
+    node._sw = node._ow;
+    return;
+  }
+  node.children.forEach(function(c) { computeWidths(c, level + 1); });
+  var childSpan = node.children.reduce(function(s, c) { return s + c._sw; }, 0)
+                + H_GAP * (node.children.length - 1);
+  node._sw = Math.max(node._ow, childSpan);
+}
+
+function placeNodes(node, cx, y) {
+  node._x = cx;
+  node._y = y;
+  if (node.children.length === 0) return;
+  var span = node.children.reduce(function(s, c) { return s + c._sw; }, 0)
+           + H_GAP * (node.children.length - 1);
+  var x = cx - span / 2;
+  node.children.forEach(function(c) {
+    placeNodes(c, x + c._sw / 2, y + V_GAP);
+    x += c._sw + H_GAP;
   });
 }
 
-// ── render ─────────────────────
-function render(){
-  // 🔥 FIX: clear everything
-  nodesLayer.innerHTML='';
-  svgEl.innerHTML='';
-  domMap.clear();
+// ── Render: wipe and redraw everything cleanly ────────────────────────────────
+function render() {
+  // 1. Compute layout
+  computeWidths(treeData, 0);
+  placeNodes(treeData, 0, 0);
 
-  calc(root,0);
-  place(root,0,0);
+  // 2. Find bounds and shift so nothing clips
+  var nodes = allNodes(treeData);
+  var minX = Infinity, maxX = -Infinity, maxY = -Infinity;
+  nodes.forEach(function(n) {
+    minX = Math.min(minX, n._x - n._sw / 2);
+    maxX = Math.max(maxX, n._x + n._sw / 2);
+    maxY = Math.max(maxY, n._y);
+  });
+  var shiftX = PAD - minX;
+  nodes.forEach(function(n) { n._x += shiftX; });
 
-  let minX=Infinity,maxX=-Infinity,maxY=0;
-  traverse(root,n=>{
-    minX=Math.min(minX,n._x-n._sw/2);
-    maxX=Math.max(maxX,n._x+n._sw/2);
-    maxY=Math.max(maxY,n._y);
+  var totalW = maxX - minX + PAD * 2;
+  var totalH = maxY + 80 + PAD;
+
+  // 3. Size the canvas
+  nodesDiv.style.width  = totalW + 'px';
+  nodesDiv.style.height = totalH + 'px';
+  svg.setAttribute('width',  totalW);
+  svg.setAttribute('height', totalH);
+  wrap.style.height = (totalH + 4) + 'px';
+
+  // 4. WIPE nodes layer completely, then rebuild from scratch
+  nodesDiv.innerHTML = '';
+
+  nodes.forEach(function(node) {
+    var el = document.createElement('div');
+    el.className = 'node lv' + Math.min(node._lv, 4);
+    el.style.left = node._x + 'px';
+    el.style.top  = node._y + 'px';
+    el.dataset.id = node.id;
+
+    // Label input
+    var inp = document.createElement('input');
+    inp.className = 'node-input';
+    inp.value = node.label;
+    inp.style.width = '0';
+    inp.style.width = (inp.scrollWidth + 2) + 'px';
+
+    inp.addEventListener('input', function() {
+      node.label = inp.value;
+      inp.style.width = '0';
+      inp.style.width = (inp.scrollWidth + 2) + 'px';
+      // Just redraw lines on label change (no full re-render needed)
+      requestAnimationFrame(function() { requestAnimationFrame(drawLines); });
+    });
+
+    // Add child button
+    var btnAdd = document.createElement('button');
+    btnAdd.className = 'btn btn-add';
+    btnAdd.textContent = '＋';
+    btnAdd.title = 'Add child';
+    btnAdd.addEventListener('click', function() {
+      node.children.push({ id: nextId++, label: 'New Item', children: [] });
+      render();
+      // Focus the new input after render
+      setTimeout(function() {
+        var inputs = nodesDiv.querySelectorAll('.node-input');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+      }, 50);
+    });
+
+    // Delete button
+    var btnDel = document.createElement('button');
+    btnDel.className = 'btn btn-del';
+    btnDel.textContent = '×';
+    btnDel.title = 'Delete node';
+    btnDel.style.display = (node.id === treeData.id) ? 'none' : '';
+    btnDel.addEventListener('click', function() {
+      findAndDelete(treeData, node.id);
+      render();
+    });
+
+    el.appendChild(inp);
+    el.appendChild(btnAdd);
+    el.appendChild(btnDel);
+    nodesDiv.appendChild(el);
   });
 
-  const shift=PAD-minX;
-  traverse(root,n=>n._x+=shift);
-
-  const w=maxX-minX+PAD*2;
-  const h=maxY+100;
-
-  nodesLayer.style.width=w+'px';
-  nodesLayer.style.height=h+'px';
-  svgEl.setAttribute('width',w);
-  svgEl.setAttribute('height',h);
-
-  traverse(root,node=>{
-    const el=build(node);
-    nodesLayer.appendChild(el);
-    domMap.set(node.id,el);
-
-    el.style.left=node._x+'px';
-    el.style.top=node._y+'px';
-    el.className=`node lv${Math.min(node._lvl,4)}`;
-  });
-
-  requestAnimationFrame(()=>requestAnimationFrame(drawLines));
+  // 5. Draw connector lines after DOM paint
+  requestAnimationFrame(function() { requestAnimationFrame(drawLines); });
 }
 
-function build(node){
-  const el=document.createElement('div');
-
-  const inp=document.createElement('input');
-  inp.className='node-input';
-  inp.value=node.label;
-  inp.oninput=()=>{ node.label=inp.value; };
-
-  const add=document.createElement('button');
-  add.textContent='＋';
-  add.className='btn';
-  add.onclick=()=>{
-    node.children.push({id:uid++,label:'New Item',children:[]});
-    render();
-  };
-
-  const del=document.createElement('button');
-  del.textContent='×';
-  del.className='btn';
-  del.onclick=()=>{
-    if(node.id===root.id)return;
-    deleteById(root,node.id);
-    render();
-  };
-
-  el.append(inp,add);
-  if(node!==root) el.append(del);
-
-  return el;
-}
-
-// ── lines ─────────────────────
+// ── Draw SVG connector lines using real DOM positions ─────────────────────────
 function drawLines() {
-  svgEl.innerHTML = '';
+  svg.innerHTML = '';
+  var wrapRect = wrap.getBoundingClientRect();
+  var sx = wrap.scrollLeft, sy = wrap.scrollTop;
 
-  const wrapRect = canvasWrap.getBoundingClientRect();
-  const sx = canvasWrap.scrollLeft;
-  const sy = canvasWrap.scrollTop;
-
-  function getRect(node) {
-    const el = domMap.get(node.id);
+  function nodeRect(node) {
+    var el = nodesDiv.querySelector('[data-id="' + node.id + '"]');
     if (!el) return null;
-
-    const r = el.getBoundingClientRect();
-
+    var r = el.getBoundingClientRect();
     return {
-      cx: r.left - wrapRect.left + r.width / 2 + sx,
-      top: r.top - wrapRect.top + sy,
-      bot: r.bottom - wrapRect.top + sy
+      cx:  r.left - wrapRect.left + r.width / 2 + sx,
+      top: r.top  - wrapRect.top               + sy,
+      bot: r.top  - wrapRect.top  + r.height   + sy
     };
   }
 
   function drawEdges(node) {
     if (!node.children.length) return;
-
-    const pr = getRect(node);
+    var pr = nodeRect(node);
     if (!pr) return;
 
-    const childrenRects = node.children
-      .map(c => getRect(c))
-      .filter(Boolean);
+    var childRects = node.children.map(nodeRect).filter(Boolean);
+    if (!childRects.length) return;
 
-    if (!childrenRects.length) return;
+    var midY = pr.bot + (childRects[0].top - pr.bot) / 2;
 
-    const midY = pr.bot + (childrenRects[0].top - pr.bot) / 2;
+    // Vertical stem down from parent
+    line(pr.cx, pr.bot, pr.cx, midY);
 
-    // ── vertical line down from parent
-    seg(pr.cx, pr.bot, pr.cx, midY);
-
-    if (childrenRects.length === 1) {
-      // single child → straight line
-      seg(pr.cx, midY, childrenRects[0].cx, childrenRects[0].top);
+    if (childRects.length === 1) {
+      line(pr.cx, midY, childRects[0].cx, childRects[0].top);
     } else {
-      // ── horizontal connector (clean split line)
-      seg(
-        childrenRects[0].cx,
-        midY,
-        childrenRects[childrenRects.length - 1].cx,
-        midY
-      );
-
-      // ── vertical drops to each child
-      childrenRects.forEach(cr => {
-        seg(cr.cx, midY, cr.cx, cr.top);
-      });
+      // Horizontal bar between first and last child only
+      line(childRects[0].cx, midY, childRects[childRects.length - 1].cx, midY);
+      // Vertical drop to each child
+      childRects.forEach(function(cr) { line(cr.cx, midY, cr.cx, cr.top); });
     }
 
     node.children.forEach(drawEdges);
   }
 
-  drawEdges(root);
+  drawEdges(treeData);
 }
 
-function seg(x1, y1, x2, y2) {
-  const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l.setAttribute('x1', x1);
-  l.setAttribute('y1', y1);
-  l.setAttribute('x2', x2);
-  l.setAttribute('y2', y2);
+function line(x1, y1, x2, y2) {
+  var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+  l.setAttribute('x2', x2); l.setAttribute('y2', y2);
   l.setAttribute('stroke', '#94a3b8');
   l.setAttribute('stroke-width', '2');
   l.setAttribute('stroke-linecap', 'round');
-  svgEl.appendChild(l);
+  svg.appendChild(l);
 }
-// ── EXPORT (clean, no DOM duplication) ─────────────────────
-function getCleanHTML(){
-  const tree = JSON.stringify(clean(root));
 
-  const clone = document.documentElement.cloneNode(true);
+// ── Export: build a clean HTML string with current data ───────────────────────
+function buildExportHTML() {
+  // Get the original page source from the template script tag
+  // We build it from the static parts of this file, injecting only the data
+  var treeJson = JSON.stringify(cloneData(treeData));
 
-  // remove rendered nodes
-  clone.querySelector('#nodes-layer').innerHTML='';
-  clone.querySelector('#svg-layer').innerHTML='';
+  // Grab the full page source and replace only the data line
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', window.location.href, false); // sync
+  try {
+    xhr.send();
+    if (xhr.status === 200) {
+      return xhr.responseText.replace(
+        /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
+        '// TREE_DATA_START\nvar treeData = ' + treeJson + ';\n// TREE_DATA_END'
+      );
+    }
+  } catch(e) {}
 
-  // replace data
-  clone.innerHTML = clone.innerHTML.replace(
+  // Fallback: if XHR fails (e.g. file:// protocol), use outerHTML but clean nodes-layer
+  var clone = document.documentElement.cloneNode(true);
+  clone.querySelector('#nodes-layer').innerHTML = '';
+  clone.querySelector('#svg-layer').innerHTML = '';
+  var html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  return html.replace(
     /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
-    `// TREE_DATA_START\nconst root = ${tree};\n// TREE_DATA_END`
+    '// TREE_DATA_START\nvar treeData = ' + treeJson + ';\n// TREE_DATA_END'
   );
-
-  return '<!DOCTYPE html>\n' + clone.outerHTML;
 }
 
-document.getElementById('btn-save').onclick=()=>{
-  const blob=new Blob([getCleanHTML()],{type:'text/html'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='tms_tree.html';
-  a.click();
-};
+// ── Save as file ──────────────────────────────────────────────────────────────
+document.getElementById('btn-save').addEventListener('click', function() {
+  var html = buildExportHTML();
+  var blob = new Blob([html], { type: 'text/html' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = 'tms_tree.html'; a.click();
+  URL.revokeObjectURL(url);
+  flash('save-msg');
+});
 
-document.getElementById('btn-copy').onclick=()=>{
-  navigator.clipboard.writeText(getCleanHTML());
-};
+// ── Copy to clipboard ─────────────────────────────────────────────────────────
+document.getElementById('btn-copy').addEventListener('click', function() {
+  var html = buildExportHTML();
+  navigator.clipboard.writeText(html).then(function() { flash('copy-msg'); });
+});
 
-// boot
+function flash(id) {
+  var el = document.getElementById(id);
+  el.style.opacity = '1';
+  setTimeout(function() { el.style.opacity = '0'; }, 2000);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
 render();
+window.addEventListener('resize', function() { render(); });
+wrap.addEventListener('scroll', drawLines);
 </script>
 
-</body>
-</html>
+
+</body></html>
