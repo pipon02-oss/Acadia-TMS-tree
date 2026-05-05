@@ -178,23 +178,49 @@ function build(node){
 // ── lines ─────────────────────
 function drawLines(){
   svgEl.innerHTML='';
+
+  const wrapRect = canvasWrap.getBoundingClientRect();
+  const sx = canvasWrap.scrollLeft;
+  const sy = canvasWrap.scrollTop;
+
   function edge(n){
-    const p=domMap.get(n.id).getBoundingClientRect();
+    const pEl = domMap.get(n.id);
+    if (!pEl) return;
+
+    const p = pEl.getBoundingClientRect();
+
     n.children.forEach(c=>{
-      const ch=domMap.get(c.id).getBoundingClientRect();
-      const l=document.createElementNS('http://www.w3.org/2000/svg','line');
-      l.setAttribute('x1',p.left+p.width/2);
-      l.setAttribute('y1',p.bottom);
-      l.setAttribute('x2',ch.left+ch.width/2);
-      l.setAttribute('y2',ch.top);
-      l.setAttribute('stroke','#94a3b8');
-      svgEl.appendChild(l);
+      const cEl = domMap.get(c.id);
+      if (!cEl) return;
+
+      const ch = cEl.getBoundingClientRect();
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+
+      // ✅ FIX: convert to canvas-relative coordinates
+      const x1 = p.left - wrapRect.left + p.width/2 + sx;
+      const y1 = p.bottom - wrapRect.top + sy;
+
+      const x2 = ch.left - wrapRect.left + ch.width/2 + sx;
+      const y2 = ch.top - wrapRect.top + sy;
+
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+
+      line.setAttribute('stroke','#94a3b8');
+      line.setAttribute('stroke-width','2');
+      line.setAttribute('stroke-linecap','round');
+
+      svgEl.appendChild(line);
+
       edge(c);
     });
   }
+
   edge(root);
 }
-
 // ── EXPORT (clean, no DOM duplication) ─────────────────────
 function getCleanHTML(){
   const tree = JSON.stringify(clean(root));
