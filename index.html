@@ -22,18 +22,19 @@ h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
 #svg-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
 #nodes-layer { position: relative; }
 .node {
-  position: absolute; transform: translateX(-50%);
+  position: absolute;
   display: inline-flex; align-items: center; gap: 5px;
-  border-radius: 10px; padding: 8px 13px;
+  border-radius: 10px; padding: 7px 12px;
   font-weight: 600; font-size: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12); white-space: nowrap;
+  /* horizontal: centre vertically on its Y coordinate */
+  transform: translateY(-50%);
 }
-.lv0 { background: #1e3a5f; color: #fff; font-size: 16px; padding: 10px 20px; }
+.lv0 { background: #1e3a5f; color: #fff; font-size: 16px; padding: 10px 18px; }
 .lv1 { background: #2563eb; color: #fff; }
 .lv2 { background: #fff; color: #1e3a5f; border: 2px solid #3b82f6; }
 .lv3 { background: #f0fdf4; color: #166534; border: 2px solid #4ade80; }
 .lv4 { background: #fefce8; color: #713f12; border: 2px solid #facc15; }
-/* Input grows with content — no fixed width */
 .node-input {
   border: none; outline: none; background: transparent;
   color: inherit; font: inherit; text-align: center;
@@ -47,7 +48,6 @@ h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
 .lv2 .btn-add, .lv3 .btn-add, .lv4 .btn-add { color: #2563eb; }
 .btn-del { color: #fca5a5; }
 .lv2 .btn-del, .lv3 .btn-del, .lv4 .btn-del { color: #ef4444; }
-/* Hidden sizer span for measuring text width */
 #sizer {
   position: absolute; visibility: hidden; white-space: pre;
   font-weight: 600; font-size: 14px;
@@ -69,37 +69,44 @@ h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
   <span class="flash" id="copy-msg">✓ Copied!</span>
 </div>
-<div id="canvas-wrap" style="height: 434px;">
-  <svg id="svg-layer" width="1251" height="430"></svg>
-  <div id="nodes-layer" style="width: 1251px; height: 430px;"></div>
+<div id="canvas-wrap" style="height: 533px;">
+  <svg id="svg-layer" width="1020" height="856"></svg>
+  <div id="nodes-layer" style="width: 1020px; height: 856px;"></div>
 </div>
-<!-- hidden span used to measure text width accurately -->
-<span id="sizer" style="font-size: 14px;">Technical Documentation</span>
+<span id="sizer" style="font-size: 14px;">Multidrops GE/UK</span>
 
 <script>
 // TREE_DATA_START
-var treeData = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[]},{"id":5,"label":"Planning/projects","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":10,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":8,"label":"Dashboards","children":[]}]},{"id":9,"label":"Technical Documentation","children":[]}]};
+var treeData = {"id":1,"label":"TMS","children":[{"id":2,"label":"Transport","children":[{"id":4,"label":"Learning","children":[]},{"id":5,"label":"Planning/projects","children":[]},{"id":505,"label":"Unrouteable by filter/country","children":[]},{"id":507,"label":"NO_NER","children":[]},{"id":508,"label":"RUSH","children":[]},{"id":509,"label":"Trailer activites UK","children":[]}]},{"id":3,"label":"Admin","children":[{"id":6,"label":"Learning","children":[{"id":10,"label":"Onboarding","children":[]}]},{"id":7,"label":"Projects","children":[]},{"id":8,"label":"Dashboards","children":[]}]},{"id":9,"label":"Technical Documentation","children":[{"id":501,"label":"Optimization Strategy","children":[{"id":503,"label":"Optimization Parameters","children":[]}]},{"id":502,"label":"SPOTBUY full Process map","children":[]},{"id":504,"label":"LC","children":[]},{"id":506,"label":"DVA","children":[]},{"id":510,"label":"DF","children":[]},{"id":511,"label":"Multidrops GE/UK","children":[]}]}]};
 // TREE_DATA_END
 
-var V_GAP = 90, H_GAP = 50, PAD = 80, nextId = 500;
+// ── Config ────────────────────────────────────────────────────────────────────
+// Horizontal tree: X = depth column, Y = position within column
+var H_STEP = 220;  // horizontal gap between levels (px)
+var V_GAP  = 14;   // vertical gap between sibling nodes (px)
+var PAD_X  = 60;   // left padding
+var PAD_Y  = 60;   // top padding
+var nextId = 600;
+
 var svg      = document.getElementById('svg-layer');
 var nodesDiv = document.getElementById('nodes-layer');
 var wrap     = document.getElementById('canvas-wrap');
 var sizer    = document.getElementById('sizer');
 
-// ── Measure text using a real DOM span (most accurate) ────────────────────────
-function measureText(text, level) {
-  sizer.style.fontSize  = (level === 0 ? 16 : 14) + 'px';
-  sizer.textContent     = text || ' ';
-  return sizer.offsetWidth + (level === 0 ? 65 : 52); // padding for buttons etc.
+// ── Text measurement ──────────────────────────────────────────────────────────
+function measureText(text, lv) {
+  sizer.style.fontSize = (lv === 0 ? 16 : 14) + 'px';
+  sizer.textContent    = text || ' ';
+  return sizer.offsetWidth + (lv === 0 ? 65 : 52);
 }
-
-// ── Size an input to exactly fit its content ──────────────────────────────────
-function fitInput(inp, level) {
-  sizer.style.fontSize = (level === 0 ? 16 : 14) + 'px';
+function fitInput(inp, lv) {
+  sizer.style.fontSize = (lv === 0 ? 16 : 14) + 'px';
   sizer.textContent    = inp.value || ' ';
   inp.style.width      = Math.max(sizer.offsetWidth, 20) + 'px';
 }
+
+// ── Node height estimate (for subtree height calc) ────────────────────────────
+var NODE_H = 36; // approx rendered height of one node
 
 // ── Data helpers ──────────────────────────────────────────────────────────────
 function allNodes(n, a) { a=a||[]; a.push(n); n.children.forEach(function(c){ allNodes(c,a); }); return a; }
@@ -109,22 +116,34 @@ function removeNode(n, id) {
   n.children.forEach(function(c){ removeNode(c,id); });
 }
 
-// ── Layout ────────────────────────────────────────────────────────────────────
-function calcW(n, lv) {
-  n._lv = lv;
-  n._ow  = measureText(n.label, lv);
-  if (!n.children.length) { n._sw = n._ow; return; }
-  n.children.forEach(function(c){ calcW(c, lv+1); });
-  var span = n.children.reduce(function(s,c){ return s+c._sw; },0) + H_GAP*(n.children.length-1);
-  n._sw = Math.max(n._ow, span);
+// ── Layout: horizontal tree ───────────────────────────────────────────────────
+// Each node gets an (x, y) where:
+//   x = level * H_STEP  (columns left→right)
+//   y = centre of its allocated vertical slot
+
+function calcSubtreeHeight(n) {
+  if (!n.children.length) {
+    n._sh = NODE_H;
+    return;
+  }
+  n.children.forEach(calcSubtreeHeight);
+  var total = n.children.reduce(function(s,c){ return s + c._sh; }, 0)
+            + V_GAP * (n.children.length - 1);
+  n._sh = Math.max(NODE_H, total);
 }
 
-function place(n, cx, y) {
-  n._x=cx; n._y=y;
+function placeNodes(n, lv, yTop) {
+  n._lv = lv;
+  n._x  = PAD_X + lv * H_STEP;
+  n._y  = yTop + n._sh / 2;   // centre of its slot
+
   if (!n.children.length) return;
-  var span = n.children.reduce(function(s,c){ return s+c._sw; },0) + H_GAP*(n.children.length-1);
-  var x = cx - span/2;
-  n.children.forEach(function(c){ place(c, x+c._sw/2, y+V_GAP); x+=c._sw+H_GAP; });
+
+  var y = yTop;
+  n.children.forEach(function(c) {
+    placeNodes(c, lv + 1, y);
+    y += c._sh + V_GAP;
+  });
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -132,88 +151,63 @@ function render() {
   nodesDiv.innerHTML = '';
   svg.innerHTML      = '';
 
-  calcW(treeData, 0);
-  place(treeData, 0, 0);
+  calcSubtreeHeight(treeData);
+  placeNodes(treeData, 0, PAD_Y);
 
   var nodes = allNodes(treeData);
-  var minX=1e9, maxX=-1e9, maxY=0;
+
+  // Find canvas size
+  var maxX = 0, maxY = 0;
   nodes.forEach(function(n){
-    minX=Math.min(minX, n._x-n._sw/2);
-    maxX=Math.max(maxX, n._x+n._sw/2);
-    maxY=Math.max(maxY, n._y);
+    maxX = Math.max(maxX, n._x + 300); // leave room for node width
+    maxY = Math.max(maxY, n._y + NODE_H/2 + PAD_Y);
   });
 
-  var shift = PAD - minX;
-  nodes.forEach(function(n){ n._x+=shift; });
+  nodesDiv.style.width  = maxX + 'px';
+  nodesDiv.style.height = maxY + 'px';
+  svg.setAttribute('width',  maxX);
+  svg.setAttribute('height', maxY);
+  wrap.style.height = Math.min(maxY + 4, window.innerHeight - 200) + 'px';
 
-  var W=maxX-minX+PAD*2, H=maxY+80+PAD;
-  nodesDiv.style.width  = W+'px';
-  nodesDiv.style.height = H+'px';
-  svg.setAttribute('width',  W);
-  svg.setAttribute('height', H);
-  wrap.style.height = (H+4)+'px';
-
-  nodes.forEach(function(node){
-    var lv  = Math.min(node._lv, 4);
-    var el  = document.createElement('div');
-    el.className = 'node lv'+lv;
-    el.style.left = node._x+'px';
-    el.style.top  = node._y+'px';
+  nodes.forEach(function(node) {
+    var lv = Math.min(node._lv, 4);
+    var el = document.createElement('div');
+    el.className = 'node lv' + lv;
+    el.style.left = node._x + 'px';
+    el.style.top  = node._y + 'px';
     el.setAttribute('data-id', node.id);
 
-    // Input — sized to content
     var inp = document.createElement('input');
     inp.className = 'node-input';
     inp.value     = node.label;
     fitInput(inp, node._lv);
 
-    inp.addEventListener('input', (function(n, i){
+    inp.addEventListener('input', (function(n, i) {
       return function() {
         n.label = i.value;
         fitInput(i, n._lv);
-        // Re-layout so connectors update too
-        requestAnimationFrame(function(){ requestAnimationFrame(function(){
-          // Recalc widths and reposition — but keep existing DOM, just move nodes
-          calcW(treeData, 0);
-          place(treeData, 0, 0);
-          var ns = allNodes(treeData);
-          var mx=1e9, mxX=-1e9;
-          ns.forEach(function(nd){ mx=Math.min(mx,nd._x-nd._sw/2); mxX=Math.max(mxX,nd._x+nd._sw/2); });
-          var sh = PAD-mx;
-          ns.forEach(function(nd){ nd._x+=sh; });
-          var newW = mxX-mx+PAD*2;
-          nodesDiv.style.width = newW+'px';
-          svg.setAttribute('width', newW);
-          // Reposition all node divs
-          ns.forEach(function(nd){
-            var div = nodesDiv.querySelector('[data-id="'+nd.id+'"]');
-            if (div) { div.style.left=nd._x+'px'; div.style.top=nd._y+'px'; }
-          });
-          drawLines();
-        }); });
+        requestAnimationFrame(function(){ requestAnimationFrame(drawLines); });
       };
     })(node, inp));
 
-    // Add child
     var btnAdd = document.createElement('button');
-    btnAdd.className='btn btn-add'; btnAdd.textContent='＋'; btnAdd.title='Add child';
-    btnAdd.addEventListener('click', (function(n){
-      return function(){
-        n.children.push({id:nextId++, label:'New Item', children:[]});
+    btnAdd.className = 'btn btn-add'; btnAdd.textContent = '＋'; btnAdd.title = 'Add child';
+    btnAdd.addEventListener('click', (function(n) {
+      return function() {
+        n.children.push({ id: nextId++, label: 'New Item', children: [] });
         render();
-        setTimeout(function(){
-          var all=nodesDiv.querySelectorAll('.node-input');
-          if (all.length) all[all.length-1].focus();
+        setTimeout(function() {
+          var all = nodesDiv.querySelectorAll('.node-input');
+          if (all.length) all[all.length - 1].focus();
         }, 50);
       };
     })(node));
 
-    // Delete
     var btnDel = document.createElement('button');
-    btnDel.className='btn btn-del'; btnDel.textContent='×'; btnDel.title='Delete';
-    btnDel.style.display = node.id===treeData.id ? 'none' : '';
-    btnDel.addEventListener('click', (function(n){
-      return function(){ if(n.id===treeData.id) return; removeNode(treeData,n.id); render(); };
+    btnDel.className = 'btn btn-del'; btnDel.textContent = '×'; btnDel.title = 'Delete';
+    btnDel.style.display = node.id === treeData.id ? 'none' : '';
+    btnDel.addEventListener('click', (function(n) {
+      return function() { if (n.id === treeData.id) return; removeNode(treeData, n.id); render(); };
     })(node));
 
     el.appendChild(inp); el.appendChild(btnAdd); el.appendChild(btnDel);
@@ -223,46 +217,63 @@ function render() {
   requestAnimationFrame(function(){ requestAnimationFrame(drawLines); });
 }
 
-// ── Draw SVG lines from real DOM positions ────────────────────────────────────
+// ── Draw connectors ───────────────────────────────────────────────────────────
+// In horizontal mode:
+//   - horizontal line goes from RIGHT edge of parent to a midpoint
+//   - vertical bar spans all children at that midpoint
+//   - horizontal lines go from midpoint to LEFT edge of each child
+
 function drawLines() {
   svg.innerHTML = '';
-  var wr=wrap.getBoundingClientRect(), sx=wrap.scrollLeft, sy=wrap.scrollTop;
+  var wr = wrap.getBoundingClientRect();
+  var sx = wrap.scrollLeft, sy = wrap.scrollTop;
 
   function pos(node) {
-    var el=nodesDiv.querySelector('[data-id="'+node.id+'"]');
+    var el = nodesDiv.querySelector('[data-id="' + node.id + '"]');
     if (!el) return null;
-    var r=el.getBoundingClientRect();
+    var r = el.getBoundingClientRect();
     return {
-      cx:  r.left-wr.left+r.width/2+sx,
-      top: r.top -wr.top           +sy,
-      bot: r.top -wr.top+r.height  +sy
+      // right edge centre
+      rx:  r.right  - wr.left + sx,
+      // left edge centre
+      lx:  r.left   - wr.left + sx,
+      cy:  r.top    - wr.top  + r.height / 2 + sy
     };
   }
 
   function edges(node) {
     if (!node.children.length) return;
-    var pr=pos(node); if (!pr) return;
-    var crs=node.children.map(pos).filter(Boolean);
+    var pr = pos(node); if (!pr) return;
+    var crs = node.children.map(pos).filter(Boolean);
     if (!crs.length) return;
-    var midY=pr.bot+(crs[0].top-pr.bot)/2;
-    line(pr.cx, pr.bot, pr.cx, midY);
-    if (crs.length===1) {
-      line(pr.cx, midY, crs[0].cx, crs[0].top);
+
+    // midpoint X between parent right edge and first child left edge
+    var midX = pr.rx + (crs[0].lx - pr.rx) / 2;
+
+    // horizontal line from parent right to midX
+    line(pr.rx, pr.cy, midX, pr.cy);
+
+    if (crs.length === 1) {
+      line(midX, crs[0].cy, crs[0].lx, crs[0].cy);
     } else {
-      line(crs[0].cx, midY, crs[crs.length-1].cx, midY);
-      crs.forEach(function(cr){ line(cr.cx, midY, cr.cx, cr.top); });
+      // vertical bar from first child cy to last child cy
+      line(midX, crs[0].cy, midX, crs[crs.length - 1].cy);
+      // horizontal line from midX to each child
+      crs.forEach(function(cr) { line(midX, cr.cy, cr.lx, cr.cy); });
     }
+
     node.children.forEach(edges);
   }
+
   edges(treeData);
 }
 
-function line(x1,y1,x2,y2) {
-  var l=document.createElementNS('http://www.w3.org/2000/svg','line');
-  l.setAttribute('x1',x1); l.setAttribute('y1',y1);
-  l.setAttribute('x2',x2); l.setAttribute('y2',y2);
-  l.setAttribute('stroke','#94a3b8'); l.setAttribute('stroke-width','2');
-  l.setAttribute('stroke-linecap','round');
+function line(x1, y1, x2, y2) {
+  var l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+  l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+  l.setAttribute('stroke', '#94a3b8'); l.setAttribute('stroke-width', '2');
+  l.setAttribute('stroke-linecap', 'round');
   svg.appendChild(l);
 }
 
@@ -273,37 +284,37 @@ function buildExport() {
   xhr.open('GET', window.location.href, false);
   try {
     xhr.send();
-    if (xhr.status===200) {
+    if (xhr.status === 200) {
       return xhr.responseText.replace(
         /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
-        '// TREE_DATA_START\nvar treeData = '+tree+';\n// TREE_DATA_END'
+        '// TREE_DATA_START\nvar treeData = ' + tree + ';\n// TREE_DATA_END'
       );
     }
   } catch(e) {}
-  var clone=document.documentElement.cloneNode(true);
-  clone.querySelector('#nodes-layer').innerHTML='';
-  clone.querySelector('#svg-layer').innerHTML='';
-  var html='<!DOCTYPE html>\n'+clone.outerHTML;
+  var clone = document.documentElement.cloneNode(true);
+  clone.querySelector('#nodes-layer').innerHTML = '';
+  clone.querySelector('#svg-layer').innerHTML   = '';
+  var html = '<!DOCTYPE html>\n' + clone.outerHTML;
   return html.replace(
     /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
-    '// TREE_DATA_START\nvar treeData = '+tree+';\n// TREE_DATA_END'
+    '// TREE_DATA_START\nvar treeData = ' + tree + ';\n// TREE_DATA_END'
   );
 }
 
 function flash(id) {
-  var el=document.getElementById(id);
-  el.style.opacity='1';
-  setTimeout(function(){ el.style.opacity='0'; },2000);
+  var el = document.getElementById(id);
+  el.style.opacity = '1';
+  setTimeout(function(){ el.style.opacity = '0'; }, 2000);
 }
 
-document.getElementById('btn-save').addEventListener('click', function(){
-  var blob=new Blob([buildExport()],{type:'text/html'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='tms_tree.html'; a.click();
+document.getElementById('btn-save').addEventListener('click', function() {
+  var blob = new Blob([buildExport()], { type: 'text/html' });
+  var a    = document.createElement('a');
+  a.href   = URL.createObjectURL(blob); a.download = 'tms_tree.html'; a.click();
   flash('save-msg');
 });
 
-document.getElementById('btn-copy').addEventListener('click', function(){
+document.getElementById('btn-copy').addEventListener('click', function() {
   navigator.clipboard.writeText(buildExport()).then(function(){ flash('copy-msg'); });
 });
 
