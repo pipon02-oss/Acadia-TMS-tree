@@ -12,12 +12,12 @@ h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
 .subtitle span { margin: 0 10px; }
 #toolbar { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
 .tool-btn { border: none; border-radius: 8px; padding: 9px 20px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-#btn-save  { background: #1e3a5f; color: #fff; }
-#btn-save:hover  { background: #2563eb; }
-#btn-copy  { background: #fff; color: #1e3a5f; border: 2px solid #3b82f6; }
-#btn-copy:hover  { background: #eff6ff; }
-#btn-snap  { background: #7c3aed; color: #fff; }
-#btn-snap:hover  { background: #6d28d9; }
+#btn-save { background: #1e3a5f; color: #fff; }
+#btn-save:hover { background: #2563eb; }
+#btn-copy { background: #fff; color: #1e3a5f; border: 2px solid #3b82f6; }
+#btn-copy:hover { background: #eff6ff; }
+#btn-snap { background: #7c3aed; color: #fff; }
+#btn-snap:hover { background: #6d28d9; }
 .flash { font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
 #save-msg { color: #16a34a; }
 #copy-msg { color: #2563eb; }
@@ -25,18 +25,22 @@ h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
 #canvas-wrap { position: relative; overflow: auto; }
 #svg-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
 #nodes-layer { position: relative; }
+
+/* 
+  KEY FIX: nodes are placed by their top-left corner (no transform).
+  We manually offset by half the height in JS so the centre aligns to _y.
+*/
 .node {
   position: absolute;
   display: inline-flex; align-items: center; gap: 5px;
   border-radius: 10px; padding: 7px 12px;
   font-weight: 600; font-size: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12); white-space: nowrap;
-  transform: translateY(-50%);
 }
 .lv0 { background: #1e3a5f; color: #fff; font-size: 16px; padding: 10px 18px; }
 .lv1 { background: #2563eb; color: #fff; }
 .lv2 { background: #fff; color: #1e3a5f; border: 2px solid #3b82f6; }
-.lv3 { background: #f0fdf4; color: #166534; border: 2px solid #4ade80; }
+.lv3 { background: #f0fdf4; color: #166634; border: 2px solid #4ade80; }
 .lv4 { background: #fefce8; color: #713f12; border: 2px solid #facc15; }
 .node-input {
   border: none; outline: none; background: transparent;
@@ -57,12 +61,6 @@ h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
   font-family: 'Segoe UI', Tahoma, sans-serif;
   top: -9999px; left: -9999px;
 }
-/* Snapshot wrapper — used only during image capture */
-#snapshot-target {
-  background: #f0f4f8;
-  display: inline-block;
-  padding: 30px;
-}
 </style>
 </head>
 <body>
@@ -78,11 +76,11 @@ h1 { text-align: center; color: #1e3a5f; margin-bottom: 6px; font-size: 22px; }
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
   <span class="flash" id="copy-msg">✓ Copied!</span>
   <button class="tool-btn" id="btn-snap">📸 Export as image</button>
-  <span class="flash" id="snap-msg" style="opacity: 0;">✓ Image saved!</span>
+  <span class="flash" id="snap-msg">✓ Image saved!</span>
 </div>
 <div id="canvas-wrap" style="height: 533px;">
-  <svg id="svg-layer" width="1020" height="856"></svg>
-  <div id="nodes-layer" style="width: 1020px; height: 856px;"></div>
+  <svg id="svg-layer" width="1070" height="856"></svg>
+  <div id="nodes-layer" style="width: 1070px; height: 856px;"></div>
 </div>
 <span id="sizer" style="font-size: 14px;">Multidrops GE/UK</span>
 
@@ -99,6 +97,7 @@ var nodesDiv = document.getElementById('nodes-layer');
 var wrap     = document.getElementById('canvas-wrap');
 var sizer    = document.getElementById('sizer');
 
+// ── Text measurement ──────────────────────────────────────────────────────────
 function measureText(text, lv) {
   sizer.style.fontSize = (lv===0?16:14)+'px';
   sizer.textContent    = text||' ';
@@ -110,6 +109,7 @@ function fitInput(inp, lv) {
   inp.style.width      = Math.max(sizer.offsetWidth,20)+'px';
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function allNodes(n,a){ a=a||[]; a.push(n); n.children.forEach(function(c){ allNodes(c,a); }); return a; }
 function cloneTree(n){ return {id:n.id,label:n.label,children:n.children.map(cloneTree)}; }
 function removeNode(n,id){
@@ -117,43 +117,58 @@ function removeNode(n,id){
   n.children.forEach(function(c){ removeNode(c,id); });
 }
 
+// ── Layout ────────────────────────────────────────────────────────────────────
 function calcSubtreeHeight(n) {
   if (!n.children.length){ n._sh=NODE_H; return; }
   n.children.forEach(calcSubtreeHeight);
   var total=n.children.reduce(function(s,c){ return s+c._sh; },0)+V_GAP*(n.children.length-1);
   n._sh=Math.max(NODE_H,total);
 }
-function placeNodes(n,lv,yTop){
-  n._lv=lv; n._x=PAD_X+lv*H_STEP; n._y=yTop+n._sh/2;
+
+function placeNodes(n, lv, yTop) {
+  n._lv = lv;
+  n._x  = PAD_X + lv * H_STEP;
+  n._cy = yTop + n._sh / 2;  // vertical CENTRE of this node's slot
   if (!n.children.length) return;
-  var y=yTop;
-  n.children.forEach(function(c){ placeNodes(c,lv+1,y); y+=c._sh+V_GAP; });
+  var y = yTop;
+  n.children.forEach(function(c){ placeNodes(c, lv+1, y); y += c._sh + V_GAP; });
 }
 
-function render(){
-  nodesDiv.innerHTML=''; svg.innerHTML='';
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  nodesDiv.innerHTML = ''; svg.innerHTML = '';
   calcSubtreeHeight(treeData);
-  placeNodes(treeData,0,PAD_Y);
-  var nodes=allNodes(treeData);
-  var maxX=0,maxY=0;
-  nodes.forEach(function(n){ maxX=Math.max(maxX,n._x+300); maxY=Math.max(maxY,n._y+NODE_H/2+PAD_Y); });
-  nodesDiv.style.width=maxX+'px'; nodesDiv.style.height=maxY+'px';
-  svg.setAttribute('width',maxX); svg.setAttribute('height',maxY);
-  wrap.style.height=Math.min(maxY+4,window.innerHeight-200)+'px';
+  placeNodes(treeData, 0, PAD_Y);
 
-  nodes.forEach(function(node){
-    var lv=Math.min(node._lv,4);
-    var el=document.createElement('div');
-    el.className='node lv'+lv;
-    el.style.left=node._x+'px'; el.style.top=node._y+'px';
-    el.setAttribute('data-id',node.id);
+  var nodes = allNodes(treeData);
+  var maxX=0, maxY=0;
+  nodes.forEach(function(n){
+    maxX=Math.max(maxX, n._x+350);
+    maxY=Math.max(maxY, n._cy + NODE_H/2 + PAD_Y);
+  });
 
-    var inp=document.createElement('input');
+  nodesDiv.style.width  = maxX+'px';
+  nodesDiv.style.height = maxY+'px';
+  svg.setAttribute('width',  maxX);
+  svg.setAttribute('height', maxY);
+  wrap.style.height = Math.min(maxY+4, window.innerHeight-200)+'px';
+
+  nodes.forEach(function(node) {
+    var lv = Math.min(node._lv, 4);
+    var el = document.createElement('div');
+    el.className = 'node lv'+lv;
+    el.setAttribute('data-id', node.id);
+
+    // Position: left = _x, top will be set after appending so we know height
+    el.style.left = node._x + 'px';
+    el.style.top  = '-9999px'; // temporary off-screen
+
+    var inp = document.createElement('input');
     inp.className='node-input'; inp.value=node.label;
-    fitInput(inp,node._lv);
+    fitInput(inp, node._lv);
     inp.addEventListener('input',(function(n,i){ return function(){
       n.label=i.value; fitInput(i,n._lv);
-      requestAnimationFrame(function(){ requestAnimationFrame(drawLines); });
+      requestAnimationFrame(function(){ requestAnimationFrame(repositionAndRedraw); });
     }; })(node,inp));
 
     var btnAdd=document.createElement('button');
@@ -174,30 +189,77 @@ function render(){
     el.appendChild(inp); el.appendChild(btnAdd); el.appendChild(btnDel);
     nodesDiv.appendChild(el);
   });
-  requestAnimationFrame(function(){ requestAnimationFrame(drawLines); });
+
+  // After all nodes are in DOM, read their actual heights and position precisely
+  requestAnimationFrame(function(){
+    nodes.forEach(function(node){
+      var el = nodesDiv.querySelector('[data-id="'+node.id+'"]');
+      if (!el) return;
+      var h = el.offsetHeight;
+      // top = cy - half height  →  visual centre aligns to _cy
+      el.style.top = (node._cy - h/2) + 'px';
+    });
+    requestAnimationFrame(drawLines);
+  });
 }
 
-function drawLines(){
-  svg.innerHTML='';
-  var wr=wrap.getBoundingClientRect(), sx=wrap.scrollLeft, sy=wrap.scrollTop;
-  function pos(node){
+// ── Reposition without full rebuild (used during typing) ─────────────────────
+function repositionAndRedraw() {
+  calcSubtreeHeight(treeData);
+  placeNodes(treeData, 0, PAD_Y);
+  var nodes = allNodes(treeData);
+  var maxX=0, maxY=0;
+  nodes.forEach(function(n){ maxX=Math.max(maxX,n._x+350); maxY=Math.max(maxY,n._cy+NODE_H/2+PAD_Y); });
+  nodesDiv.style.width=maxX+'px'; svg.setAttribute('width',maxX);
+  nodes.forEach(function(node){
     var el=nodesDiv.querySelector('[data-id="'+node.id+'"]');
-    if(!el) return null;
-    var r=el.getBoundingClientRect();
-    return { rx:r.right-wr.left+sx, lx:r.left-wr.left+sx, cy:r.top-wr.top+r.height/2+sy };
+    if (!el) return;
+    var h=el.offsetHeight;
+    el.style.left = node._x+'px';
+    el.style.top  = (node._cy - h/2)+'px';
+  });
+  drawLines();
+}
+
+// ── Draw connectors using layout coordinates (not bounding rects) ─────────────
+// This is the key fix: we use _x, _cy, and actual offsetWidth/offsetHeight
+// so lines always attach exactly to the node edges regardless of scroll/transform.
+function drawLines() {
+  svg.innerHTML = '';
+
+  function getCoords(node) {
+    var el = nodesDiv.querySelector('[data-id="'+node.id+'"]');
+    if (!el) return null;
+    var w = el.offsetWidth;
+    var h = el.offsetHeight;
+    // top-left of element in nodesDiv coordinate space
+    var elLeft = parseFloat(el.style.left);
+    var elTop  = parseFloat(el.style.top);
+    return {
+      lx: elLeft,           // left edge
+      rx: elLeft + w,       // right edge
+      cy: elTop  + h / 2    // vertical centre
+    };
   }
-  function edges(node){
-    if(!node.children.length) return;
-    var pr=pos(node); if(!pr) return;
-    var crs=node.children.map(pos).filter(Boolean);
-    if(!crs.length) return;
-    var midX=pr.rx+(crs[0].lx-pr.rx)/2;
-    line(pr.rx,pr.cy,midX,pr.cy);
-    if(crs.length===1){
-      line(midX,crs[0].cy,crs[0].lx,crs[0].cy);
+
+  function edges(node) {
+    if (!node.children.length) return;
+    var pr = getCoords(node); if (!pr) return;
+    var crs = node.children.map(getCoords).filter(Boolean);
+    if (!crs.length) return;
+
+    var midX = pr.rx + (crs[0].lx - pr.rx) / 2;
+
+    // horizontal line from right edge of parent to midpoint
+    line(pr.rx, pr.cy, midX, pr.cy);
+
+    if (crs.length === 1) {
+      line(midX, crs[0].cy, crs[0].lx, crs[0].cy);
     } else {
-      line(midX,crs[0].cy,midX,crs[crs.length-1].cy);
-      crs.forEach(function(cr){ line(midX,cr.cy,cr.lx,cr.cy); });
+      // vertical bar
+      line(midX, crs[0].cy, midX, crs[crs.length-1].cy);
+      // horizontal lines to each child
+      crs.forEach(function(cr){ line(midX, cr.cy, cr.lx, cr.cy); });
     }
     node.children.forEach(edges);
   }
@@ -215,34 +277,30 @@ function line(x1,y1,x2,y2){
 
 // ── Snapshot ──────────────────────────────────────────────────────────────────
 document.getElementById('btn-snap').addEventListener('click', function(){
-  // Hide edit buttons temporarily
   var btns = nodesDiv.querySelectorAll('.btn');
   btns.forEach(function(b){ b.style.display='none'; });
 
-  // Make the full tree visible (temporarily remove scroll clipping)
   var prevOverflow = wrap.style.overflow;
   var prevHeight   = wrap.style.height;
   wrap.style.overflow = 'visible';
   wrap.style.height   = 'auto';
 
+  var W = parseInt(nodesDiv.style.width)  + 60;
+  var H = parseInt(nodesDiv.style.height) + 60;
+
   html2canvas(wrap, {
     backgroundColor: '#f0f4f8',
-    scale: 2,              // 2x resolution for crisp slides
+    scale: 2,
     useCORS: true,
-    scrollX: 0,
-    scrollY: 0,
-    width:  parseInt(nodesDiv.style.width)  + 60,
-    height: parseInt(nodesDiv.style.height) + 60,
+    scrollX: 0, scrollY: 0,
+    width: W, height: H
   }).then(function(canvas){
-    // Restore
     wrap.style.overflow = prevOverflow;
     wrap.style.height   = prevHeight;
     btns.forEach(function(b){ b.style.display=''; });
-
-    // Download PNG
-    var a = document.createElement('a');
-    a.download = 'TMS_tree.png';
-    a.href = canvas.toDataURL('image/png');
+    var a=document.createElement('a');
+    a.download='TMS_tree.png';
+    a.href=canvas.toDataURL('image/png');
     a.click();
     flash('snap-msg');
   });
@@ -280,8 +338,7 @@ function flash(id){
 
 document.getElementById('btn-save').addEventListener('click',function(){
   var blob=new Blob([buildExport()],{type:'text/html'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='tms_tree.html'; a.click();
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tms_tree.html'; a.click();
   flash('save-msg');
 });
 document.getElementById('btn-copy').addEventListener('click',function(){
