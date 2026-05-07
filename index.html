@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -6,220 +7,220 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-  background: #f0f4f8;
-  min-height: 100vh;
-  padding: 30px 20px;
+body{
+  font-family:'Segoe UI',Tahoma,sans-serif;
+  background:#f0f4f8;
+  min-height:100vh;
+  padding:30px 20px;
 }
 
-h1 {
-  text-align: center;
-  color: #1e3a5f;
-  margin-bottom: 6px;
-  font-size: 22px;
+h1{
+  text-align:center;
+  color:#1e3a5f;
+  margin-bottom:6px;
+  font-size:22px;
 }
 
-.subtitle {
-  text-align: center;
-  font-size: 12px;
-  color: #64748b;
-  margin-bottom: 14px;
+.subtitle{
+  text-align:center;
+  font-size:12px;
+  color:#64748b;
+  margin-bottom:14px;
 }
 
-.subtitle span {
-  margin: 0 10px;
+.subtitle span{
+  margin:0 10px;
 }
 
-#toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
+#toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:24px;
 }
 
-.tool-btn {
-  border: none;
-  border-radius: 8px;
-  padding: 9px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+.tool-btn{
+  border:none;
+  border-radius:8px;
+  padding:9px 20px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
 }
 
-#btn-save {
-  background: #1e3a5f;
-  color: #fff;
+#btn-save{
+  background:#1e3a5f;
+  color:#fff;
 }
 
-#btn-save:hover {
-  background: #2563eb;
+#btn-save:hover{
+  background:#2563eb;
 }
 
-#btn-copy {
-  background: #fff;
-  color: #1e3a5f;
-  border: 2px solid #3b82f6;
+#btn-copy{
+  background:#fff;
+  color:#1e3a5f;
+  border:2px solid #3b82f6;
 }
 
-#btn-copy:hover {
-  background: #eff6ff;
+#btn-copy:hover{
+  background:#eff6ff;
 }
 
-#btn-snap {
-  background: #7c3aed;
-  color: #fff;
+#btn-snap{
+  background:#7c3aed;
+  color:#fff;
 }
 
-#btn-snap:hover {
-  background: #6d28d9;
+#btn-snap:hover{
+  background:#6d28d9;
 }
 
-.flash {
-  font-size: 13px;
-  font-weight: 600;
-  opacity: 0;
-  transition: opacity 0.3s;
+.flash{
+  font-size:13px;
+  font-weight:600;
+  opacity:0;
+  transition:opacity .3s;
 }
 
-#save-msg { color: #16a34a; }
-#copy-msg { color: #2563eb; }
-#snap-msg { color: #7c3aed; }
+#save-msg{ color:#16a34a; }
+#copy-msg{ color:#2563eb; }
+#snap-msg{ color:#7c3aed; }
 
-#canvas-wrap {
-  position: relative;
-  overflow: auto;
+#canvas-wrap{
+  position:relative;
+  overflow:auto;
 }
 
-#svg-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
+#svg-layer{
+  position:absolute;
+  top:0;
+  left:0;
+  pointer-events:none;
 }
 
-#nodes-layer {
-  position: relative;
+#nodes-layer{
+  position:relative;
 }
 
-.node {
-  position: absolute;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 10px;
-  padding: 7px 12px;
-  font-weight: 600;
-  font-size: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  white-space: nowrap;
+.node{
+  position:absolute;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  border-radius:10px;
+  padding:7px 12px;
+  font-weight:600;
+  font-size:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.12);
+  white-space:nowrap;
 }
 
-.lv0 {
-  background: #1e3a5f;
-  color: #fff;
-  font-size: 16px;
-  padding: 10px 18px;
+.lv0{
+  background:#1e3a5f;
+  color:#fff;
+  font-size:16px;
+  padding:10px 18px;
 }
 
-.lv1 {
-  background: #2563eb;
-  color: #fff;
+.lv1{
+  background:#2563eb;
+  color:#fff;
 }
 
-.lv2 {
-  background: #fff;
-  color: #1e3a5f;
-  border: 2px solid #3b82f6;
+.lv2{
+  background:#fff;
+  color:#1e3a5f;
+  border:2px solid #3b82f6;
 }
 
-.lv3 {
-  background: #f0fdf4;
-  color: #166634;
-  border: 2px solid #4ade80;
+.lv3{
+  background:#f0fdf4;
+  color:#166634;
+  border:2px solid #4ade80;
 }
 
-.lv4 {
-  background: #fefce8;
-  color: #713f12;
-  border: 2px solid #facc15;
+.lv4{
+  background:#fefce8;
+  color:#713f12;
+  border:2px solid #facc15;
 }
 
-.node-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: center;
-  min-width: 20px;
-  width: auto;
+.node-input{
+  border:none;
+  outline:none;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  text-align:center;
+  min-width:20px;
+  width:auto;
 }
 
-.node-input:focus {
-  border-bottom: 1px dashed rgba(255,255,255,0.5);
+.node-input:focus{
+  border-bottom:1px dashed rgba(255,255,255,0.5);
 }
 
 .lv2 .node-input:focus,
 .lv3 .node-input:focus,
-.lv4 .node-input:focus {
-  border-bottom-color: #3b82f6;
+.lv4 .node-input:focus{
+  border-bottom-color:#3b82f6;
 }
 
-.btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  padding: 1px 4px;
-  border-radius: 4px;
-  opacity: 0.75;
-  line-height: 1;
-  transition: opacity 0.2s ease;
+.btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:13px;
+  padding:1px 4px;
+  border-radius:4px;
+  opacity:.75;
+  line-height:1;
+  transition:opacity .2s ease;
 }
 
-.btn:hover {
-  opacity: 1;
+.btn:hover{
+  opacity:1;
 }
 
-.btn-add {
-  color: #86efac;
+.btn-add{
+  color:#86efac;
 }
 
 .lv2 .btn-add,
 .lv3 .btn-add,
-.lv4 .btn-add {
-  color: #2563eb;
+.lv4 .btn-add{
+  color:#2563eb;
 }
 
-.btn-del {
-  color: #fca5a5;
+.btn-del{
+  color:#fca5a5;
 }
 
 .lv2 .btn-del,
 .lv3 .btn-del,
-.lv4 .btn-del {
-  color: #ef4444;
+.lv4 .btn-del{
+  color:#ef4444;
 }
 
-#sizer {
-  position: absolute;
-  visibility: hidden;
-  white-space: pre;
-  font-weight: 600;
-  font-size: 14px;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-  top: -9999px;
-  left: -9999px;
+#sizer{
+  position:absolute;
+  visibility:hidden;
+  white-space:pre;
+  font-weight:600;
+  font-size:14px;
+  font-family:'Segoe UI',Tahoma,sans-serif;
+  top:-9999px;
+  left:-9999px;
 }
 </style>
 </head>
@@ -236,19 +237,36 @@ h1 {
 </div>
 
 <div id="toolbar">
-  <button class="tool-btn" id="btn-save">💾 Save as file</button>
-  <span class="flash" id="save-msg">✓ Downloaded!</span>
 
-  <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
-  <span class="flash" id="copy-msg" style="opacity: 0;">✓ Copied!</span>
+  <button class="tool-btn" id="btn-save">
+    💾 Save as file
+  </button>
 
-  <button class="tool-btn" id="btn-snap">📸 Export as image</button>
-  <span class="flash" id="snap-msg" style="opacity: 0;">✓ Image saved!</span>
+  <span class="flash" id="save-msg">
+    ✓ Downloaded!
+  </span>
+
+  <button class="tool-btn" id="btn-copy">
+    📋 Copy to clipboard
+  </button>
+
+  <span class="flash" id="copy-msg" style="opacity: 0;">
+    ✓ Copied!
+  </span>
+
+  <button class="tool-btn" id="btn-snap">
+    📸 Export as image
+  </button>
+
+  <span class="flash" id="snap-msg">
+    ✓ Image saved!
+  </span>
+
 </div>
 
 <div id="canvas-wrap" style="height: 831px;">
-  <svg id="svg-layer" width="1216" height="1006"><line x1="185" y1="503" x2="223.5" y2="503" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="223.5" y1="203" x2="223.5" y2="728" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="223.5" y1="203" x2="262" y2="203" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="223.5" y1="428" x2="262" y2="428" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="223.5" y1="728" x2="262" y2="728" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="424" y1="203" x2="508.5" y2="203" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="508.5" y1="78" x2="508.5" y2="328" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="508.5" y1="78" x2="593" y2="78" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="508.5" y1="128" x2="593" y2="128" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="508.5" y1="178" x2="593" y2="178" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="508.5" y1="228" x2="593" y2="228" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="508.5" y1="278" x2="593" y2="278" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="508.5" y1="328" x2="593" y2="328" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="753" y1="78" x2="851.5" y2="78" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="851.5" y1="78" x2="950" y2="78" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="405" y1="428" x2="499" y2="428" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="499" y1="378" x2="499" y2="478" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="499" y1="378" x2="593" y2="378" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="499" y1="428" x2="593" y2="428" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="499" y1="478" x2="593" y2="478" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="753" y1="378" x2="851.5" y2="378" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="851.5" y1="378" x2="950" y2="378" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="524" y1="728" x2="558.5" y2="728" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="558.5" y1="553" x2="558.5" y2="903" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="558.5" y1="553" x2="593" y2="553" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="558.5" y1="653" x2="593" y2="653" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="558.5" y1="728" x2="593" y2="728" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="558.5" y1="778" x2="593" y2="778" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="558.5" y1="828" x2="593" y2="828" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="558.5" y1="903" x2="593" y2="903" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="781" y1="553" x2="865.5" y2="553" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="865.5" y1="528" x2="865.5" y2="578" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="865.5" y1="528" x2="950" y2="528" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="865.5" y1="578" x2="950" y2="578" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="866" y1="653" x2="908" y2="653" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="908" y1="628" x2="908" y2="678" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="908" y1="628" x2="950" y2="628" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="908" y1="678" x2="950" y2="678" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="768" y1="903" x2="859" y2="903" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="859" y1="878" x2="859" y2="927.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="859" y1="878" x2="950" y2="878" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line><line x1="859" y1="927.5" x2="950" y2="927.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"></line></svg>
-  <div id="nodes-layer" style="width: 1216px; height: 1006px;"><div class="node lv0" data-id="1" style="left: 60px; top: 482.5px;"><input class="node-input" style="width: 32px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv1" data-id="2" style="left: 262px; top: 186.5px;"><input class="node-input" style="width: 61px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="4" style="left: 593px; top: 59.5px;"><input class="node-input" style="width: 55px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1014" style="left: 950px; top: 59.5px;"><input class="node-input" style="width: 76px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="5" style="left: 593px; top: 109.5px;"><input class="node-input" style="width: 112px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1004" style="left: 593px; top: 159.5px;"><input class="node-input" style="width: 187px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1005" style="left: 593px; top: 209.5px;"><input class="node-input" style="width: 54px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1006" style="left: 593px; top: 259.5px;"><input class="node-input" style="width: 36px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1016" style="left: 593px; top: 309.5px;"><input class="node-input" style="width: 123px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv1" data-id="3" style="left: 262px; top: 411.5px;"><input class="node-input" style="width: 42px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="6" style="left: 593px; top: 359.5px;"><input class="node-input" style="width: 55px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1015" style="left: 950px; top: 359.5px;"><input class="node-input" style="width: 76px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1007" style="left: 593px; top: 409.5px;"><input class="node-input" style="width: 50px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1008" style="left: 593px; top: 459.5px;"><input class="node-input" style="width: 75px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv1" data-id="1002" style="left: 262px; top: 711.5px;"><input class="node-input" style="width: 161px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1003" style="left: 593px; top: 534.5px;"><input class="node-input" style="width: 83px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1017" style="left: 950px; top: 509.5px;"><input class="node-input" style="width: 53px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1018" style="left: 950px; top: 559.5px;"><input class="node-input" style="width: 71px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1009" style="left: 593px; top: 634.5px;"><input class="node-input" style="width: 168px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1019" style="left: 950px; top: 609.5px;"><input class="node-input" style="width: 28px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1020" style="left: 950px; top: 659.5px;"><input class="node-input" style="width: 27px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1010" style="left: 593px; top: 709.5px;"><input class="node-input" style="width: 20px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1011" style="left: 593px; top: 759.5px;"><input class="node-input" style="width: 28px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1012" style="left: 593px; top: 809.5px;"><input class="node-input" style="width: 20px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv2" data-id="1013" style="left: 593px; top: 884.5px;"><input class="node-input" style="width: 70px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1021" style="left: 950px; top: 859.5px;"><input class="node-input" style="width: 20px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div><div class="node lv3" data-id="1022" style="left: 950px; top: 909px;"><input class="node-input" style="width: 20px;"><button class="btn" title="Open / Edit link" style="opacity: 0.4;">🔗</button><button class="btn btn-add" title="Add child" style="">＋</button><button class="btn btn-del" title="Delete" style="">×</button></div></div>
+  <svg id="svg-layer" width="1117" height="1006"></svg>
+  <div id="nodes-layer" style="width: 1117px; height: 1006px;"></div>
 </div>
 
 <span id="sizer" style="font-size: 14px;">UK</span>
@@ -258,34 +276,171 @@ h1 {
 // TREE_DATA_START
 
 var treeData = {
-  "id":1,
-  "label":"TMS",
-  "children":[
+  "id": 1,
+  "label": "TMS",
+  "url": "",
+  "children": [
     {
-      "id":2,
-      "label":"Transport",
-      "children":[
+      "id": 2,
+      "label": "Transport",
+      "url": "",
+      "children": [
         {
-          "id":4,
-          "label":"Learning",
-          "url":"https://google.com",
-          "children":[]
+          "id": 4,
+          "label": "Learning",
+          "url": "https://google.com",
+          "children": [
+            {
+              "id": 1000,
+              "label": "Onboarding",
+              "url": "",
+              "children": []
+            }
+          ]
         },
         {
-          "id":5,
-          "label":"Planning/projects",
-          "children":[]
+          "id": 5,
+          "label": "Planning/projects",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1002,
+          "label": "Unrouteable by filter/country",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1003,
+          "label": "NO_NER",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1004,
+          "label": "RUSH",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1014,
+          "label": "Trailer Activities UK",
+          "url": "",
+          "children": []
         }
       ]
     },
     {
-      "id":3,
-      "label":"Admin",
-      "children":[
+      "id": 3,
+      "label": "Admin",
+      "url": "",
+      "children": [
         {
-          "id":6,
-          "label":"Learning",
-          "children":[]
+          "id": 6,
+          "label": "Learning",
+          "url": "",
+          "children": [
+            {
+              "id": 1013,
+              "label": "Onboarding",
+              "url": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": 1005,
+          "label": "Projects",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1006,
+          "label": "Dashboards",
+          "url": "",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": 1001,
+      "label": "New Item",
+      "url": "",
+      "children": [
+        {
+          "id": 1007,
+          "label": "Optimization",
+          "url": "",
+          "children": [
+            {
+              "id": 1015,
+              "label": "Strategy",
+              "url": "",
+              "children": []
+            },
+            {
+              "id": 1016,
+              "label": "Parameters",
+              "url": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": 1008,
+          "label": "SPOTBUY full Process map",
+          "url": "",
+          "children": [
+            {
+              "id": 1017,
+              "label": "TMS",
+              "url": "",
+              "children": []
+            },
+            {
+              "id": 1018,
+              "label": "TNX",
+              "url": "",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": 1009,
+          "label": "LC",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1010,
+          "label": "DVA",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1011,
+          "label": "DF",
+          "url": "",
+          "children": []
+        },
+        {
+          "id": 1012,
+          "label": "Multidrops",
+          "url": "",
+          "children": [
+            {
+              "id": 1019,
+              "label": "GE",
+              "url": "",
+              "children": []
+            },
+            {
+              "id": 1020,
+              "label": "UK",
+              "url": "",
+              "children": []
+            }
+          ]
         }
       ]
     }
@@ -306,37 +461,51 @@ var nodesDiv = document.getElementById('nodes-layer');
 var wrap     = document.getElementById('canvas-wrap');
 var sizer    = document.getElementById('sizer');
 
-function measureText(text, lv) {
-  sizer.style.fontSize = (lv===0?16:14)+'px';
-  sizer.textContent = text || ' ';
+function measureText(text, lv){
+
+  sizer.style.fontSize=(lv===0?16:14)+'px';
+  sizer.textContent=text||' ';
+
   return sizer.offsetWidth + 130;
+
 }
 
-function fitInput(inp, lv) {
-  sizer.style.fontSize = (lv===0?16:14)+'px';
-  sizer.textContent = inp.value || ' ';
-  inp.style.width = Math.max(sizer.offsetWidth,20)+'px';
+function fitInput(inp, lv){
+
+  sizer.style.fontSize=(lv===0?16:14)+'px';
+  sizer.textContent=inp.value||' ';
+
+  inp.style.width=Math.max(sizer.offsetWidth,20)+'px';
+
 }
 
 function allNodes(n,a){
+
   a=a||[];
+
   a.push(n);
+
   n.children.forEach(function(c){
     allNodes(c,a);
   });
+
   return a;
+
 }
 
 function cloneTree(n){
+
   return {
     id:n.id,
     label:n.label,
     url:n.url || '',
     children:n.children.map(cloneTree)
   };
+
 }
 
 function removeNode(n,id){
+
   n.children=n.children.filter(function(c){
     return c.id!==id;
   });
@@ -344,90 +513,115 @@ function removeNode(n,id){
   n.children.forEach(function(c){
     removeNode(c,id);
   });
+
 }
 
-function collectLevelWidths(n, lv, map) {
-  var w = measureText(n.label, lv);
+function collectLevelWidths(n,lv,map){
 
-  map[lv] = Math.max(map[lv]||0, w);
+  var w=measureText(n.label,lv);
+
+  map[lv]=Math.max(map[lv]||0,w);
 
   n.children.forEach(function(c){
-    collectLevelWidths(c, lv+1, map);
+    collectLevelWidths(c,lv+1,map);
   });
+
 }
 
-function buildColX(map) {
-  var colX = [PAD_X];
+function buildColX(map){
 
-  var maxLv = Object.keys(map).length;
+  var colX=[PAD_X];
 
-  for (var lv=1; lv<maxLv; lv++) {
-    colX[lv] = colX[lv-1] + (map[lv-1]||0) + COL_GAP;
+  var maxLv=Object.keys(map).length;
+
+  for(var lv=1; lv<maxLv; lv++){
+
+    colX[lv]=
+      colX[lv-1]+
+      (map[lv-1]||0)+
+      COL_GAP;
+
   }
 
   return colX;
+
 }
 
-function calcSubtreeHeight(n) {
+function calcSubtreeHeight(n){
 
-  if (!n.children.length){
+  if(!n.children.length){
+
     n._sh=NODE_H;
+
     return;
+
   }
 
   n.children.forEach(calcSubtreeHeight);
 
-  var total=n.children.reduce(function(s,c){
-    return s+c._sh;
-  },0)+V_GAP*(n.children.length-1);
+  var total=
+    n.children.reduce(function(s,c){
+      return s+c._sh;
+    },0)+
+    V_GAP*(n.children.length-1);
 
   n._sh=Math.max(NODE_H,total);
+
 }
 
-function placeNodes(n, lv, yTop, colX) {
+function placeNodes(n,lv,yTop,colX){
 
-  n._lv = lv;
-  n._x = colX[lv];
-  n._cy = yTop + n._sh/2;
+  n._lv=lv;
+  n._x=colX[lv];
+  n._cy=yTop+n._sh/2;
 
-  if (!n.children.length) return;
+  if(!n.children.length) return;
 
-  var y = yTop;
+  var y=yTop;
 
   n.children.forEach(function(c){
-    placeNodes(c, lv+1, y, colX);
-    y += c._sh + V_GAP;
+
+    placeNodes(c,lv+1,y,colX);
+
+    y+=c._sh+V_GAP;
+
   });
+
 }
 
-function render() {
+function render(){
 
   nodesDiv.innerHTML='';
   svg.innerHTML='';
 
-  var lvWidths = {};
+  var lvWidths={};
 
   collectLevelWidths(treeData,0,lvWidths);
 
-  var colX = buildColX(lvWidths);
+  var colX=buildColX(lvWidths);
 
   calcSubtreeHeight(treeData);
 
   placeNodes(treeData,0,PAD_Y,colX);
 
-  var nodes = allNodes(treeData);
+  var nodes=allNodes(treeData);
 
-  var maxLv = Object.keys(lvWidths).length - 1;
+  var maxLv=Object.keys(lvWidths).length-1;
 
-  var maxX =
-    (colX[maxLv] || PAD_X) +
-    (lvWidths[maxLv] || 200) +
+  var maxX=
+    (colX[maxLv]||PAD_X)+
+    (lvWidths[maxLv]||200)+
     PAD_X;
 
-  var maxY = 0;
+  var maxY=0;
 
   nodes.forEach(function(n){
-    maxY=Math.max(maxY,n._cy+NODE_H/2+PAD_Y);
+
+    maxY=Math.max(
+      maxY,
+      n._cy+NODE_H/2+PAD_Y
+    );
+
   });
 
   nodesDiv.style.width=maxX+'px';
@@ -436,16 +630,14 @@ function render() {
   svg.setAttribute('width',maxX);
   svg.setAttribute('height',maxY);
 
-  wrap.style.height=Math.min(
-    maxY+4,
-    window.innerHeight-200
-  )+'px';
+  wrap.style.height=
+    Math.min(maxY+4,window.innerHeight-200)+'px';
 
   nodes.forEach(function(node){
 
-    var lv = Math.min(node._lv,4);
+    var lv=Math.min(node._lv,4);
 
-    var el = document.createElement('div');
+    var el=document.createElement('div');
 
     el.className='node lv'+lv;
 
@@ -473,7 +665,11 @@ function render() {
         fitInput(i,n._lv);
 
         requestAnimationFrame(function(){
-          requestAnimationFrame(repositionAndRedraw);
+
+          requestAnimationFrame(
+            repositionAndRedraw
+          );
+
         });
 
       };
@@ -500,26 +696,30 @@ function render() {
 
         if(n.url){
 
-          var openNow = confirm(
-            'Open existing link?\n\n' +
-            'Press OK to open.\n' +
+          var openNow=confirm(
+            'Open existing link?\n\n'+
+            'Press OK to open.\n'+
             'Press Cancel to edit.'
           );
 
           if(openNow){
+
             window.open(n.url,'_blank');
+
             return;
+
           }
+
         }
 
-        var newUrl = prompt(
+        var newUrl=prompt(
           'Enter URL (leave empty to remove):',
-          n.url || ''
+          n.url||''
         );
 
         if(newUrl===null) return;
 
-        newUrl = newUrl.trim();
+        newUrl=newUrl.trim();
 
         if(newUrl===''){
 
@@ -528,10 +728,13 @@ function render() {
           btn.style.opacity='0.4';
 
           return;
+
         }
 
         if(!/^https?:\/\//i.test(newUrl)){
+
           newUrl='https://'+newUrl;
+
         }
 
         n.url=newUrl;
@@ -557,10 +760,10 @@ function render() {
       return function(){
 
         n.children.push({
-          id: nextId++,
-          label: 'New Item',
-          url: '',
-          children: []
+          id:nextId++,
+          label:'New Item',
+          url:'',
+          children:[]
         });
 
         render();
@@ -579,7 +782,8 @@ function render() {
 
     btnDel.title='Delete';
 
-    btnDel.style.display=node.id===treeData.id?'none':'';
+    btnDel.style.display=
+      node.id===treeData.id?'none':'';
 
     btnDel.addEventListener('click',(function(n){
 
@@ -615,7 +819,7 @@ function render() {
       if(!el) return;
 
       el.style.top=
-        (node._cy - el.offsetHeight/2)+'px';
+        (node._cy-el.offsetHeight/2)+'px';
 
     });
 
@@ -655,6 +859,7 @@ function repositionAndRedraw(){
   });
 
   drawLines();
+
 }
 
 function drawLines(){
@@ -693,20 +898,34 @@ function drawLines(){
 
     if(!crs.length) return;
 
-    var midX=pr.rx+(crs[0].lx-pr.rx)/2;
+    var midX=
+      pr.rx+
+      (crs[0].lx-pr.rx)/2;
 
     line(pr.rx,pr.cy,midX,pr.cy);
 
     if(crs.length===1){
 
-      line(midX,crs[0].cy,crs[0].lx,crs[0].cy);
+      line(
+        midX,
+        crs[0].cy,
+        crs[0].lx,
+        crs[0].cy
+      );
 
     } else {
 
-      line(midX,crs[0].cy,midX,crs[crs.length-1].cy);
+      line(
+        midX,
+        crs[0].cy,
+        midX,
+        crs[crs.length-1].cy
+      );
 
       crs.forEach(function(cr){
+
         line(midX,cr.cy,cr.lx,cr.cy);
+
       });
 
     }
@@ -740,30 +959,36 @@ function line(x1,y1,x2,y2){
 
 }
 
+// FIXED EXPORT
+
 function buildExport(){
 
-  var tree=JSON.stringify(cloneTree(treeData));
+  var clone=document.documentElement.cloneNode(true);
 
-  var xhr=new XMLHttpRequest();
+  var clonedNodes=clone.querySelector('#nodes-layer');
+  var clonedSvg=clone.querySelector('#svg-layer');
 
-  xhr.open('GET',window.location.href,false);
+  if(clonedNodes) clonedNodes.innerHTML='';
+  if(clonedSvg) clonedSvg.innerHTML='';
 
-  try{
+  var scripts=clone.querySelectorAll('script');
 
-    xhr.send();
+  scripts.forEach(function(scr){
 
-    if(xhr.status===200){
+    if(scr.innerHTML.includes('// TREE_DATA_START')){
 
-      return xhr.responseText.replace(
+      scr.innerHTML=scr.innerHTML.replace(
         /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
-        '// TREE_DATA_START\nvar treeData = '+tree+';\n// TREE_DATA_END'
+        '// TREE_DATA_START\n\nvar treeData = '+
+        JSON.stringify(cloneTree(treeData),null,2)+
+        ';\n\n// TREE_DATA_END'
       );
 
     }
 
-  } catch(e){}
+  });
 
-  return document.documentElement.outerHTML;
+  return '<!DOCTYPE html>\n'+clone.outerHTML;
 
 }
 
@@ -774,12 +999,15 @@ function flash(id){
   el.style.opacity='1';
 
   setTimeout(function(){
+
     el.style.opacity='0';
+
   },2000);
 
 }
 
-document.getElementById('btn-save').addEventListener('click',function(){
+document.getElementById('btn-save')
+.addEventListener('click',function(){
 
   var blob=new Blob(
     [buildExport()],
@@ -798,21 +1026,27 @@ document.getElementById('btn-save').addEventListener('click',function(){
 
 });
 
-document.getElementById('btn-copy').addEventListener('click',function(){
+document.getElementById('btn-copy')
+.addEventListener('click',function(){
 
   navigator.clipboard.writeText(buildExport())
     .then(function(){
+
       flash('copy-msg');
+
     });
 
 });
 
-document.getElementById('btn-snap').addEventListener('click', function(){
+document.getElementById('btn-snap')
+.addEventListener('click',function(){
 
   var btns=nodesDiv.querySelectorAll('.btn');
 
   btns.forEach(function(b){
+
     b.style.display='none';
+
   });
 
   html2canvas(wrap,{
@@ -822,7 +1056,9 @@ document.getElementById('btn-snap').addEventListener('click', function(){
   }).then(function(canvas){
 
     btns.forEach(function(b){
+
       b.style.display='';
+
     });
 
     var a=document.createElement('a');
@@ -839,9 +1075,9 @@ document.getElementById('btn-snap').addEventListener('click', function(){
 
 });
 
-wrap.addEventListener('scroll', drawLines);
+wrap.addEventListener('scroll',drawLines);
 
-window.addEventListener('resize', render);
+window.addEventListener('resize',render);
 
 render();
 
