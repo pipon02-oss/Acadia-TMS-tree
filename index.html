@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TMS Project Tree</title>
@@ -50,15 +51,15 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
   <button class="tool-btn" id="btn-save">💾 Save as file</button>
   <span class="flash" id="save-msg">✓ Downloaded!</span>
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
-  <span class="flash" id="copy-msg" style="opacity: 0;">✓ Copied!</span>
+  <span class="flash" id="copy-msg">✓ Copied!</span>
   <button class="tool-btn" id="btn-snap">📸 Export as image</button>
   <span class="flash" id="snap-msg">✓ Image saved!</span>
 </div>
-<div id="canvas-wrap" style="height: 834px;">
-  <svg id="svg-layer" width="1216" height="1006"></svg>
-  <div id="nodes-layer" style="width: 1216px; height: 1006px;"></div>
+<div id="canvas-wrap">
+  <svg id="svg-layer"></svg>
+  <div id="nodes-layer"></div>
 </div>
-<span id="sizer" style="font-size: 14px;">UK</span>
+<span id="sizer"></span>
 
 <script>
 // TREE_DATA_START
@@ -316,6 +317,5 @@ wrap.addEventListener('scroll',drawLines);
 window.addEventListener('resize',render);
 render();
 </script>
-
-
-</body></html>
+</body>
+</html>
