@@ -3,1084 +3,309 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TMS Project Tree</title>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-body{
-  font-family:'Segoe UI',Tahoma,sans-serif;
-  background:#f0f4f8;
-  min-height:100vh;
-  padding:30px 20px;
-}
-
-h1{
-  text-align:center;
-  color:#1e3a5f;
-  margin-bottom:6px;
-  font-size:22px;
-}
-
-.subtitle{
-  text-align:center;
-  font-size:12px;
-  color:#64748b;
-  margin-bottom:14px;
-}
-
-.subtitle span{
-  margin:0 10px;
-}
-
-#toolbar{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-bottom:24px;
-}
-
-.tool-btn{
-  border:none;
-  border-radius:8px;
-  padding:9px 20px;
-  font-size:14px;
-  font-weight:600;
-  cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
-}
-
-#btn-save{
-  background:#1e3a5f;
-  color:#fff;
-}
-
-#btn-save:hover{
-  background:#2563eb;
-}
-
-#btn-copy{
-  background:#fff;
-  color:#1e3a5f;
-  border:2px solid #3b82f6;
-}
-
-#btn-copy:hover{
-  background:#eff6ff;
-}
-
-#btn-snap{
-  background:#7c3aed;
-  color:#fff;
-}
-
-#btn-snap:hover{
-  background:#6d28d9;
-}
-
-.flash{
-  font-size:13px;
-  font-weight:600;
-  opacity:0;
-  transition:opacity .3s;
-}
-
-#save-msg{ color:#16a34a; }
-#copy-msg{ color:#2563eb; }
-#snap-msg{ color:#7c3aed; }
-
-#canvas-wrap{
-  position:relative;
-  overflow:auto;
-}
-
-#svg-layer{
-  position:absolute;
-  top:0;
-  left:0;
-  pointer-events:none;
-}
-
-#nodes-layer{
-  position:relative;
-}
-
-.node{
-  position:absolute;
-  display:inline-flex;
-  align-items:center;
-  gap:5px;
-  border-radius:10px;
-  padding:7px 12px;
-  font-weight:600;
-  font-size:14px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.12);
-  white-space:nowrap;
-}
-
-.lv0{
-  background:#1e3a5f;
-  color:#fff;
-  font-size:16px;
-  padding:10px 18px;
-}
-
-.lv1{
-  background:#2563eb;
-  color:#fff;
-}
-
-.lv2{
-  background:#fff;
-  color:#1e3a5f;
-  border:2px solid #3b82f6;
-}
-
-.lv3{
-  background:#f0fdf4;
-  color:#166634;
-  border:2px solid #4ade80;
-}
-
-.lv4{
-  background:#fefce8;
-  color:#713f12;
-  border:2px solid #facc15;
-}
-
-.node-input{
-  border:none;
-  outline:none;
-  background:transparent;
-  color:inherit;
-  font:inherit;
-  text-align:center;
-  min-width:20px;
-  width:auto;
-}
-
-.node-input:focus{
-  border-bottom:1px dashed rgba(255,255,255,0.5);
-}
-
-.lv2 .node-input:focus,
-.lv3 .node-input:focus,
-.lv4 .node-input:focus{
-  border-bottom-color:#3b82f6;
-}
-
-.btn{
-  background:none;
-  border:none;
-  cursor:pointer;
-  font-size:13px;
-  padding:1px 4px;
-  border-radius:4px;
-  opacity:.75;
-  line-height:1;
-  transition:opacity .2s ease;
-}
-
-.btn:hover{
-  opacity:1;
-}
-
-.btn-add{
-  color:#86efac;
-}
-
-.lv2 .btn-add,
-.lv3 .btn-add,
-.lv4 .btn-add{
-  color:#2563eb;
-}
-
-.btn-del{
-  color:#fca5a5;
-}
-
-.lv2 .btn-del,
-.lv3 .btn-del,
-.lv4 .btn-del{
-  color:#ef4444;
-}
-
-#sizer{
-  position:absolute;
-  visibility:hidden;
-  white-space:pre;
-  font-weight:600;
-  font-size:14px;
-  font-family:'Segoe UI',Tahoma,sans-serif;
-  top:-9999px;
-  left:-9999px;
-}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:'Segoe UI',Tahoma,sans-serif; background:#f0f4f8; min-height:100vh; padding:30px 20px; }
+h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
+.subtitle{ text-align:center; font-size:12px; color:#64748b; margin-bottom:14px; }
+.subtitle span{ margin:0 10px; }
+#toolbar{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+.tool-btn{ border:none; border-radius:8px; padding:9px 20px; font-size:14px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+#btn-save{ background:#1e3a5f; color:#fff; } #btn-save:hover{ background:#2563eb; }
+#btn-copy{ background:#fff; color:#1e3a5f; border:2px solid #3b82f6; } #btn-copy:hover{ background:#eff6ff; }
+#btn-snap{ background:#7c3aed; color:#fff; } #btn-snap:hover{ background:#6d28d9; }
+.flash{ font-size:13px; font-weight:600; opacity:0; transition:opacity .3s; }
+#save-msg{ color:#16a34a; } #copy-msg{ color:#2563eb; } #snap-msg{ color:#7c3aed; }
+#canvas-wrap{ position:relative; overflow:auto; }
+#svg-layer{ position:absolute; top:0; left:0; pointer-events:none; }
+#nodes-layer{ position:relative; }
+.node{ position:absolute; display:inline-flex; align-items:center; gap:5px; border-radius:10px; padding:7px 12px; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.12); white-space:nowrap; }
+.lv0{ background:#1e3a5f; color:#fff; font-size:16px; padding:10px 18px; }
+.lv1{ background:#2563eb; color:#fff; }
+.lv2{ background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
+.lv3{ background:#f0fdf4; color:#166634; border:2px solid #4ade80; }
+.lv4{ background:#fefce8; color:#713f12; border:2px solid #facc15; }
+.node-input{ border:none; outline:none; background:transparent; color:inherit; font:inherit; text-align:center; min-width:20px; width:auto; }
+.node-input:focus{ border-bottom:1px dashed rgba(255,255,255,0.5); }
+.lv2 .node-input:focus,.lv3 .node-input:focus,.lv4 .node-input:focus{ border-bottom-color:#3b82f6; }
+.btn{ background:none; border:none; cursor:pointer; font-size:13px; padding:1px 4px; border-radius:4px; opacity:.75; line-height:1; }
+.btn:hover{ opacity:1; }
+.btn-add{ color:#86efac; }
+.lv2 .btn-add,.lv3 .btn-add,.lv4 .btn-add{ color:#2563eb; }
+.btn-del{ color:#fca5a5; }
+.lv2 .btn-del,.lv3 .btn-del,.lv4 .btn-del{ color:#ef4444; }
+#sizer{ position:absolute; visibility:hidden; white-space:pre; font-weight:600; font-size:14px; font-family:'Segoe UI',Tahoma,sans-serif; top:-9999px; left:-9999px; }
 </style>
 </head>
-
 <body>
-
 <h1>📋 TMS Project Tree</h1>
-
 <div class="subtitle">
   <span>✏️ Rename node</span>
   <span>🔗 Add/Open links</span>
   <span>➕ Add child</span>
   <span>🗑️ Delete node</span>
 </div>
-
 <div id="toolbar">
-
-  <button class="tool-btn" id="btn-save">
-    💾 Save as file
-  </button>
-
-  <span class="flash" id="save-msg">
-    ✓ Downloaded!
-  </span>
-
-  <button class="tool-btn" id="btn-copy">
-    📋 Copy to clipboard
-  </button>
-
-  <span class="flash" id="copy-msg" style="opacity: 0;">
-    ✓ Copied!
-  </span>
-
-  <button class="tool-btn" id="btn-snap">
-    📸 Export as image
-  </button>
-
-  <span class="flash" id="snap-msg">
-    ✓ Image saved!
-  </span>
-
+  <button class="tool-btn" id="btn-save">💾 Save as file</button>
+  <span class="flash" id="save-msg">✓ Downloaded!</span>
+  <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
+  <span class="flash" id="copy-msg">✓ Copied!</span>
+  <button class="tool-btn" id="btn-snap">📸 Export as image</button>
+  <span class="flash" id="snap-msg">✓ Image saved!</span>
 </div>
-
-<div id="canvas-wrap" style="height: 831px;">
-  <svg id="svg-layer" width="1214" height="1006"></svg>
-  <div id="nodes-layer" style="width: 1214px; height: 1006px;"></div>
+<div id="canvas-wrap" style="height: 834px;">
+  <svg id="svg-layer" width="1216" height="1006"></svg>
+  <div id="nodes-layer" style="width: 1216px; height: 1006px;"></div>
 </div>
-
 <span id="sizer" style="font-size: 14px;">UK</span>
 
 <script>
-
 // TREE_DATA_START
-
-var treeData = {
-  "id": 1,
-  "label": "TMS",
-  "url": "",
-  "children": [
-    {
-      "id": 2,
-      "label": "Transport",
-      "url": "",
-      "children": [
-        {
-          "id": 4,
-          "label": "Learning",
-          "url": "",
-          "children": [
-            {
-              "id": 1000,
-              "label": "Onboarding",
-              "url": "https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500757/en-us",
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": 5,
-          "label": "Planning/projects",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1004,
-          "label": "Unrouteable by filter/country",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1005,
-          "label": "NO_NER",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1006,
-          "label": "RUSH",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1007,
-          "label": "Trailer Activities UK",
-          "url": "",
-          "children": []
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "label": "Admin",
-      "url": "",
-      "children": [
-        {
-          "id": 6,
-          "label": "Learning",
-          "url": "",
-          "children": [
-            {
-              "id": 1010,
-              "label": "Onboarding",
-              "url": "",
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": 1008,
-          "label": "Projects",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1009,
-          "label": "Dashboards",
-          "url": "",
-          "children": []
-        }
-      ]
-    },
-    {
-      "id": 1003,
-      "label": "Technical documentation",
-      "url": "",
-      "children": [
-        {
-          "id": 1011,
-          "label": "Optimizaiton",
-          "url": "",
-          "children": [
-            {
-              "id": 1017,
-              "label": "Strategy",
-              "url": "",
-              "children": []
-            },
-            {
-              "id": 1018,
-              "label": "Parameters",
-              "url": "",
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": 1012,
-          "label": "SPOTBUY full Process map",
-          "url": "",
-          "children": [
-            {
-              "id": 1019,
-              "label": "TMS",
-              "url": "",
-              "children": []
-            },
-            {
-              "id": 1020,
-              "label": "TNX",
-              "url": "",
-              "children": []
-            }
-          ]
-        },
-        {
-          "id": 1013,
-          "label": "LC",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1014,
-          "label": "DVA",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1015,
-          "label": "DF",
-          "url": "",
-          "children": []
-        },
-        {
-          "id": 1016,
-          "label": "Multidrops",
-          "url": "",
-          "children": [
-            {
-              "id": 1021,
-              "label": "GE",
-              "url": "",
-              "children": []
-            },
-            {
-              "id": 1022,
-              "label": "UK",
-              "url": "",
-              "children": []
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
+var treeData = {"id":1,"label":"TMS","url":"","children":[{"id":2,"label":"Transport","url":"","children":[{"id":4,"label":"Learning","url":"","children":[{"id":101,"label":"Onboarding","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500757/en-us","children":[]}]},{"id":5,"label":"Planning/projects","url":"","children":[]},{"id":102,"label":"Unrouteable by filter/country","url":"","children":[]},{"id":103,"label":"NO_NER","url":"","children":[]},{"id":104,"label":"RUSH","url":"","children":[]},{"id":105,"label":"Trailer Activities UK","url":"","children":[]}]},{"id":3,"label":"Admin","url":"","children":[{"id":6,"label":"Learning","url":"","children":[{"id":106,"label":"Onboarding","url":"","children":[]}]},{"id":107,"label":"Projects","url":"","children":[]},{"id":108,"label":"Dashboards","url":"","children":[]}]},{"id":9,"label":"Technical Documentation","url":"","children":[{"id":109,"label":"Optimization","url":"","children":[{"id":110,"label":"Strategy","url":"","children":[]},{"id":111,"label":"Parameters","url":"","children":[]}]},{"id":112,"label":"SPOTBUY full Process map","url":"","children":[{"id":113,"label":"TMS","url":"","children":[]},{"id":114,"label":"TNX","url":"","children":[]}]},{"id":115,"label":"LC","url":"","children":[]},{"id":116,"label":"DVA","url":"","children":[]},{"id":117,"label":"DF","url":"","children":[]},{"id":118,"label":"Multidrops","url":"","children":[{"id":119,"label":"GE","url":"","children":[]},{"id":120,"label":"UK","url":"","children":[]}]}]}]};
 // TREE_DATA_END
 
-var COL_GAP = 40;
-var V_GAP   = 14;
-var PAD_X   = 60;
-var PAD_Y   = 60;
-var NODE_H  = 36;
-var nextId  = 1000;
+var COL_GAP=40, V_GAP=14, PAD_X=60, PAD_Y=60, NODE_H=36;
+
+// nextId starts high enough to never clash with existing IDs
+var nextId = 500;
 
 var svg      = document.getElementById('svg-layer');
 var nodesDiv = document.getElementById('nodes-layer');
 var wrap     = document.getElementById('canvas-wrap');
 var sizer    = document.getElementById('sizer');
 
-function measureText(text, lv){
+// ── Ensure all existing IDs are tracked so nextId never duplicates ────────────
+function maxId(n) {
+  var m = n.id;
+  n.children.forEach(function(c){ m = Math.max(m, maxId(c)); });
+  return m;
+}
+nextId = maxId(treeData) + 1;
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function measureText(text,lv){
   sizer.style.fontSize=(lv===0?16:14)+'px';
   sizer.textContent=text||' ';
-
-  return sizer.offsetWidth + 130;
-
+  return sizer.offsetWidth+130;
 }
-
-function fitInput(inp, lv){
-
+function fitInput(inp,lv){
   sizer.style.fontSize=(lv===0?16:14)+'px';
   sizer.textContent=inp.value||' ';
-
   inp.style.width=Math.max(sizer.offsetWidth,20)+'px';
-
 }
-
-function allNodes(n,a){
-
-  a=a||[];
-
-  a.push(n);
-
-  n.children.forEach(function(c){
-    allNodes(c,a);
-  });
-
-  return a;
-
-}
-
-function cloneTree(n){
-
-  return {
-    id:n.id,
-    label:n.label,
-    url:n.url || '',
-    children:n.children.map(cloneTree)
-  };
-
-}
-
+function allNodes(n,a){ a=a||[]; a.push(n); n.children.forEach(function(c){ allNodes(c,a); }); return a; }
+function cloneTree(n){ return {id:n.id,label:n.label,url:n.url||'',children:n.children.map(cloneTree)}; }
 function removeNode(n,id){
-
-  n.children=n.children.filter(function(c){
-    return c.id!==id;
-  });
-
-  n.children.forEach(function(c){
-    removeNode(c,id);
-  });
-
+  n.children=n.children.filter(function(c){ return c.id!==id; });
+  n.children.forEach(function(c){ removeNode(c,id); });
 }
-
 function collectLevelWidths(n,lv,map){
-
-  var w=measureText(n.label,lv);
-
-  map[lv]=Math.max(map[lv]||0,w);
-
-  n.children.forEach(function(c){
-    collectLevelWidths(c,lv+1,map);
-  });
-
+  map[lv]=Math.max(map[lv]||0,measureText(n.label,lv));
+  n.children.forEach(function(c){ collectLevelWidths(c,lv+1,map); });
 }
-
 function buildColX(map){
-
-  var colX=[PAD_X];
-
-  var maxLv=Object.keys(map).length;
-
-  for(var lv=1; lv<maxLv; lv++){
-
-    colX[lv]=
-      colX[lv-1]+
-      (map[lv-1]||0)+
-      COL_GAP;
-
-  }
-
+  var colX=[PAD_X], maxLv=Object.keys(map).length;
+  for(var lv=1;lv<maxLv;lv++) colX[lv]=colX[lv-1]+(map[lv-1]||0)+COL_GAP;
   return colX;
-
 }
-
 function calcSubtreeHeight(n){
-
-  if(!n.children.length){
-
-    n._sh=NODE_H;
-
-    return;
-
-  }
-
+  if(!n.children.length){ n._sh=NODE_H; return; }
   n.children.forEach(calcSubtreeHeight);
-
-  var total=
-    n.children.reduce(function(s,c){
-      return s+c._sh;
-    },0)+
-    V_GAP*(n.children.length-1);
-
+  var total=n.children.reduce(function(s,c){ return s+c._sh; },0)+V_GAP*(n.children.length-1);
   n._sh=Math.max(NODE_H,total);
-
 }
-
 function placeNodes(n,lv,yTop,colX){
-
-  n._lv=lv;
-  n._x=colX[lv];
-  n._cy=yTop+n._sh/2;
-
+  n._lv=lv; n._x=colX[lv]; n._cy=yTop+n._sh/2;
   if(!n.children.length) return;
-
   var y=yTop;
-
-  n.children.forEach(function(c){
-
-    placeNodes(c,lv+1,y,colX);
-
-    y+=c._sh+V_GAP;
-
-  });
-
+  n.children.forEach(function(c){ placeNodes(c,lv+1,y,colX); y+=c._sh+V_GAP; });
 }
 
+// ── Render ────────────────────────────────────────────────────────────────────
 function render(){
-
-  nodesDiv.innerHTML='';
-  svg.innerHTML='';
+  nodesDiv.innerHTML=''; svg.innerHTML='';
 
   var lvWidths={};
-
   collectLevelWidths(treeData,0,lvWidths);
-
   var colX=buildColX(lvWidths);
-
   calcSubtreeHeight(treeData);
-
   placeNodes(treeData,0,PAD_Y,colX);
 
   var nodes=allNodes(treeData);
-
   var maxLv=Object.keys(lvWidths).length-1;
-
-  var maxX=
-    (colX[maxLv]||PAD_X)+
-    (lvWidths[maxLv]||200)+
-    PAD_X;
-
+  var maxX=(colX[maxLv]||PAD_X)+(lvWidths[maxLv]||200)+PAD_X;
   var maxY=0;
+  nodes.forEach(function(n){ maxY=Math.max(maxY,n._cy+NODE_H/2+PAD_Y); });
 
-  nodes.forEach(function(n){
-
-    maxY=Math.max(
-      maxY,
-      n._cy+NODE_H/2+PAD_Y
-    );
-
-  });
-
-  nodesDiv.style.width=maxX+'px';
-  nodesDiv.style.height=maxY+'px';
-
-  svg.setAttribute('width',maxX);
-  svg.setAttribute('height',maxY);
-
-  wrap.style.height=
-    Math.min(maxY+4,window.innerHeight-200)+'px';
+  nodesDiv.style.width=maxX+'px'; nodesDiv.style.height=maxY+'px';
+  svg.setAttribute('width',maxX); svg.setAttribute('height',maxY);
+  wrap.style.height=Math.min(maxY+4,window.innerHeight-200)+'px';
 
   nodes.forEach(function(node){
-
     var lv=Math.min(node._lv,4);
-
     var el=document.createElement('div');
-
     el.className='node lv'+lv;
-
-    el.setAttribute('data-id',node.id);
-
+    // Use unique DOM attribute — combine id + position in allNodes to avoid duplicate-id confusion
+    el.setAttribute('data-uid', node._uid = node._uid || (node.id+'_'+Math.random().toString(36).slice(2)));
     el.style.left=node._x+'px';
     el.style.top='-9999px';
 
-    // INPUT
-
+    // Input
     var inp=document.createElement('input');
-
-    inp.className='node-input';
-
-    inp.value=node.label;
-
+    inp.className='node-input'; inp.value=node.label;
     fitInput(inp,node._lv);
+    inp.addEventListener('input',(function(n,i){ return function(){
+      n.label=i.value; fitInput(i,n._lv);
+      requestAnimationFrame(function(){ requestAnimationFrame(repositionAndRedraw); });
+    }; })(node,inp));
 
-    inp.addEventListener('input',(function(n,i){
-
-      return function(){
-
-        n.label=i.value;
-
-        fitInput(i,n._lv);
-
-        requestAnimationFrame(function(){
-
-          requestAnimationFrame(
-            repositionAndRedraw
-          );
-
-        });
-
-      };
-
-    })(node,inp));
-
-    // LINK BUTTON
-
+    // Link button
     var btnLink=document.createElement('button');
-
-    btnLink.className='btn';
-
-    btnLink.innerHTML='🔗';
-
-    btnLink.title='Open / Edit link';
-
+    btnLink.className='btn'; btnLink.innerHTML='🔗'; btnLink.title='Open / Edit link';
     btnLink.style.opacity=node.url?'1':'0.4';
+    btnLink.addEventListener('click',(function(n,btn){ return function(e){
+      e.stopPropagation();
+      if(n.url){
+        var openNow=confirm('Open existing link?\n\nOK = open link\nCancel = edit link');
+        if(openNow){ window.open(n.url,'_blank'); return; }
+      }
+      var newUrl=prompt('Enter URL (leave empty to remove):',n.url||'');
+      if(newUrl===null) return;
+      newUrl=newUrl.trim();
+      if(newUrl===''){ n.url=''; btn.style.opacity='0.4'; return; }
+      if(!/^https?:\/\//i.test(newUrl)) newUrl='https://'+newUrl;
+      n.url=newUrl; btn.style.opacity='1';
+    }; })(node,btnLink));
 
-    btnLink.addEventListener('click',(function(n,btn){
-
-      return function(e){
-
-        e.stopPropagation();
-
-        if(n.url){
-
-          var openNow=confirm(
-            'Open existing link?\n\n'+
-            'Press OK to open.\n'+
-            'Press Cancel to edit.'
-          );
-
-          if(openNow){
-
-            window.open(n.url,'_blank');
-
-            return;
-
-          }
-
-        }
-
-        var newUrl=prompt(
-          'Enter URL (leave empty to remove):',
-          n.url||''
-        );
-
-        if(newUrl===null) return;
-
-        newUrl=newUrl.trim();
-
-        if(newUrl===''){
-
-          delete n.url;
-
-          btn.style.opacity='0.4';
-
-          return;
-
-        }
-
-        if(!/^https?:\/\//i.test(newUrl)){
-
-          newUrl='https://'+newUrl;
-
-        }
-
-        n.url=newUrl;
-
-        btn.style.opacity='1';
-
-      };
-
-    })(node,btnLink));
-
-    // ADD BUTTON
-
+    // Add child
     var btnAdd=document.createElement('button');
+    btnAdd.className='btn btn-add'; btnAdd.textContent='＋'; btnAdd.title='Add child';
+    btnAdd.addEventListener('click',(function(n){ return function(){
+      n.children.push({id:nextId++, label:'New Item', url:'', children:[]});
+      render();
+    }; })(node));
 
-    btnAdd.className='btn btn-add';
-
-    btnAdd.textContent='＋';
-
-    btnAdd.title='Add child';
-
-    btnAdd.addEventListener('click',(function(n){
-
-      return function(){
-
-        n.children.push({
-          id:nextId++,
-          label:'New Item',
-          url:'',
-          children:[]
-        });
-
-        render();
-
-      };
-
-    })(node));
-
-    // DELETE BUTTON
-
+    // Delete
     var btnDel=document.createElement('button');
+    btnDel.className='btn btn-del'; btnDel.textContent='×'; btnDel.title='Delete';
+    btnDel.style.display=node.id===treeData.id?'none':'';
+    btnDel.addEventListener('click',(function(n){ return function(){
+      if(n.id===treeData.id) return; removeNode(treeData,n.id); render();
+    }; })(node));
 
-    btnDel.className='btn btn-del';
-
-    btnDel.textContent='×';
-
-    btnDel.title='Delete';
-
-    btnDel.style.display=
-      node.id===treeData.id?'none':'';
-
-    btnDel.addEventListener('click',(function(n){
-
-      return function(){
-
-        if(n.id===treeData.id) return;
-
-        removeNode(treeData,n.id);
-
-        render();
-
-      };
-
-    })(node));
-
-    el.appendChild(inp);
-    el.appendChild(btnLink);
-    el.appendChild(btnAdd);
-    el.appendChild(btnDel);
-
+    el.appendChild(inp); el.appendChild(btnLink); el.appendChild(btnAdd); el.appendChild(btnDel);
     nodesDiv.appendChild(el);
-
   });
 
+  // After paint: set correct vertical positions then draw lines
   requestAnimationFrame(function(){
-
     nodes.forEach(function(node){
-
-      var el=nodesDiv.querySelector(
-        '[data-id="'+node.id+'"]'
-      );
-
+      var el=nodesDiv.querySelector('[data-uid="'+node._uid+'"]');
       if(!el) return;
-
-      el.style.top=
-        (node._cy-el.offsetHeight/2)+'px';
-
+      el.style.top=(node._cy-el.offsetHeight/2)+'px';
     });
-
     requestAnimationFrame(drawLines);
-
   });
-
 }
 
 function repositionAndRedraw(){
-
   var lvWidths={};
-
   collectLevelWidths(treeData,0,lvWidths);
-
   var colX=buildColX(lvWidths);
-
   calcSubtreeHeight(treeData);
-
   placeNodes(treeData,0,PAD_Y,colX);
-
   var nodes=allNodes(treeData);
-
   nodes.forEach(function(node){
-
-    var el=nodesDiv.querySelector(
-      '[data-id="'+node.id+'"]'
-    );
-
+    var el=nodesDiv.querySelector('[data-uid="'+node._uid+'"]');
     if(!el) return;
-
     el.style.left=node._x+'px';
-
-    el.style.top=
-      (node._cy-el.offsetHeight/2)+'px';
-
+    el.style.top=(node._cy-el.offsetHeight/2)+'px';
   });
-
   drawLines();
-
 }
 
+// ── Connectors ────────────────────────────────────────────────────────────────
 function drawLines(){
-
   svg.innerHTML='';
-
   function getCoords(node){
-
-    var el=nodesDiv.querySelector(
-      '[data-id="'+node.id+'"]'
-    );
-
+    var el=nodesDiv.querySelector('[data-uid="'+node._uid+'"]');
     if(!el) return null;
-
     var left=parseFloat(el.style.left);
-
     var top=parseFloat(el.style.top);
-
-    return {
-      lx:left,
-      rx:left+el.offsetWidth,
-      cy:top+el.offsetHeight/2
-    };
-
+    return { lx:left, rx:left+el.offsetWidth, cy:top+el.offsetHeight/2 };
   }
-
   function edges(node){
-
     if(!node.children.length) return;
-
-    var pr=getCoords(node);
-
-    if(!pr) return;
-
+    var pr=getCoords(node); if(!pr) return;
     var crs=node.children.map(getCoords).filter(Boolean);
-
     if(!crs.length) return;
-
-    var midX=
-      pr.rx+
-      (crs[0].lx-pr.rx)/2;
-
+    var midX=pr.rx+(crs[0].lx-pr.rx)/2;
     line(pr.rx,pr.cy,midX,pr.cy);
-
     if(crs.length===1){
-
-      line(
-        midX,
-        crs[0].cy,
-        crs[0].lx,
-        crs[0].cy
-      );
-
+      line(midX,crs[0].cy,crs[0].lx,crs[0].cy);
     } else {
-
-      line(
-        midX,
-        crs[0].cy,
-        midX,
-        crs[crs.length-1].cy
-      );
-
-      crs.forEach(function(cr){
-
-        line(midX,cr.cy,cr.lx,cr.cy);
-
-      });
-
+      line(midX,crs[0].cy,midX,crs[crs.length-1].cy);
+      crs.forEach(function(cr){ line(midX,cr.cy,cr.lx,cr.cy); });
     }
-
     node.children.forEach(edges);
-
   }
-
   edges(treeData);
-
 }
 
 function line(x1,y1,x2,y2){
-
-  var l=document.createElementNS(
-    'http://www.w3.org/2000/svg',
-    'line'
-  );
-
-  l.setAttribute('x1',x1);
-  l.setAttribute('y1',y1);
-
-  l.setAttribute('x2',x2);
-  l.setAttribute('y2',y2);
-
-  l.setAttribute('stroke','#94a3b8');
-  l.setAttribute('stroke-width','2');
+  var l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+  l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+  l.setAttribute('stroke','#94a3b8'); l.setAttribute('stroke-width','2');
   l.setAttribute('stroke-linecap','round');
-
   svg.appendChild(l);
-
 }
 
-// FIXED EXPORT
-
+// ── Export ────────────────────────────────────────────────────────────────────
 function buildExport(){
-
   var clone=document.documentElement.cloneNode(true);
-
-  var clonedNodes=clone.querySelector('#nodes-layer');
-  var clonedSvg=clone.querySelector('#svg-layer');
-
-  if(clonedNodes) clonedNodes.innerHTML='';
-  if(clonedSvg) clonedSvg.innerHTML='';
-
-  var scripts=clone.querySelectorAll('script');
-
-  scripts.forEach(function(scr){
-
+  var cn=clone.querySelector('#nodes-layer'); if(cn) cn.innerHTML='';
+  var cs=clone.querySelector('#svg-layer');   if(cs) cs.innerHTML='';
+  clone.querySelectorAll('script').forEach(function(scr){
     if(scr.innerHTML.includes('// TREE_DATA_START')){
-
       scr.innerHTML=scr.innerHTML.replace(
         /\/\/ TREE_DATA_START[\s\S]*?\/\/ TREE_DATA_END/,
-        '// TREE_DATA_START\n\nvar treeData = '+
-        JSON.stringify(cloneTree(treeData),null,2)+
-        ';\n\n// TREE_DATA_END'
+        '// TREE_DATA_START\nvar treeData = '+JSON.stringify(cloneTree(treeData))+';\n// TREE_DATA_END'
       );
-
     }
-
   });
-
   return '<!DOCTYPE html>\n'+clone.outerHTML;
-
 }
 
 function flash(id){
-
   var el=document.getElementById(id);
-
   el.style.opacity='1';
-
-  setTimeout(function(){
-
-    el.style.opacity='0';
-
-  },2000);
-
+  setTimeout(function(){ el.style.opacity='0'; },2000);
 }
 
-document.getElementById('btn-save')
-.addEventListener('click',function(){
-
-  var blob=new Blob(
-    [buildExport()],
-    {type:'text/html'}
-  );
-
-  var a=document.createElement('a');
-
-  a.href=URL.createObjectURL(blob);
-
-  a.download='tms_tree.html';
-
-  a.click();
-
+document.getElementById('btn-save').addEventListener('click',function(){
+  var blob=new Blob([buildExport()],{type:'text/html'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tms_tree.html'; a.click();
   flash('save-msg');
-
 });
-
-document.getElementById('btn-copy')
-.addEventListener('click',function(){
-
-  navigator.clipboard.writeText(buildExport())
-    .then(function(){
-
-      flash('copy-msg');
-
-    });
-
+document.getElementById('btn-copy').addEventListener('click',function(){
+  navigator.clipboard.writeText(buildExport()).then(function(){ flash('copy-msg'); });
 });
-
-document.getElementById('btn-snap')
-.addEventListener('click',function(){
-
+document.getElementById('btn-snap').addEventListener('click',function(){
   var btns=nodesDiv.querySelectorAll('.btn');
-
-  btns.forEach(function(b){
-
-    b.style.display='none';
-
-  });
-
-  html2canvas(wrap,{
-    backgroundColor:'#f0f4f8',
-    scale:2,
-    useCORS:true
-  }).then(function(canvas){
-
-    btns.forEach(function(b){
-
-      b.style.display='';
-
-    });
-
+  btns.forEach(function(b){ b.style.display='none'; });
+  html2canvas(wrap,{backgroundColor:'#f0f4f8',scale:2,useCORS:true}).then(function(canvas){
+    btns.forEach(function(b){ b.style.display=''; });
     var a=document.createElement('a');
-
-    a.download='TMS_tree.png';
-
-    a.href=canvas.toDataURL('image/png');
-
-    a.click();
-
+    a.download='TMS_tree.png'; a.href=canvas.toDataURL('image/png'); a.click();
     flash('snap-msg');
-
   });
-
 });
 
 wrap.addEventListener('scroll',drawLines);
-
 window.addEventListener('resize',render);
-
 render();
-
 </script>
 
 
