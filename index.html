@@ -74,19 +74,19 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
   <button class="tool-btn" id="btn-save">💾 Save as file</button>
   <span class="flash" id="save-msg">✓ Downloaded!</span>
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
-  <span class="flash" id="copy-msg">✓ Copied!</span>
+  <span class="flash" id="copy-msg" style="opacity: 0;">✓ Copied!</span>
   <button class="tool-btn" id="btn-snap">📸 Export as image</button>
   <span class="flash" id="snap-msg">✓ Image saved!</span>
 </div>
-<div id="canvas-wrap" style="height: 831px;">
-  <svg id="svg-layer" width="1450" height="1056"></svg>
-  <div id="nodes-layer" style="width: 1450px; height: 1056px;"></div>
+<div id="canvas-wrap" style="height: 711px;">
+  <svg id="svg-layer" width="1486" height="1106"></svg>
+  <div id="nodes-layer" style="width: 1486px; height: 1106px;"></div>
 </div>
 <span id="sizer" style="font-size: 14px;">Admin</span>
 
 <script>
 // TREE_DATA_START
-var treeData = {"id":1,"label":"TMS","url":"","children":[{"id":2,"label":"Transport","url":"","children":[{"id":4,"label":"Learning","url":"","children":[{"id":101,"label":"Onboarding","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500757/en-us","children":[]}]},{"id":5,"label":"Planning/projects","url":"","children":[{"id":122,"label":"NO_NER","url":"","children":[]},{"id":123,"label":"RUSH","url":"","children":[]},{"id":124,"label":"Trailer Activities UK","url":"","children":[]}]},{"id":125,"label":"JOBSERVER","url":"","children":[]}]},{"id":3,"label":"Admin","url":"","children":[{"id":6,"label":"Learning","url":"","children":[{"id":106,"label":"Onboarding","url":"","children":[]},{"id":121,"label":"Extra Charges + Stops","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500766/en-us","children":[]}]},{"id":107,"label":"Projects","url":"","children":[]},{"id":108,"label":"Dashboards","url":"","children":[]}]},{"id":128,"label":"Technical Documentation","url":"","children":[{"id":129,"label":"System","url":"","children":[{"id":132,"label":"Optimization","url":"","children":[{"id":133,"label":"Strategy","url":"","children":[]},{"id":134,"label":"Parameters","url":"","children":[]}]}]},{"id":130,"label":"TP","url":"","children":[{"id":135,"label":"SPOTBUY Process Map","url":"","children":[{"id":136,"label":"TMS","url":"","children":[]},{"id":137,"label":"TNX","url":"","children":[]}]},{"id":138,"label":"LC","url":"","children":[]},{"id":139,"label":"DVA","url":"","children":[]},{"id":140,"label":"DF","url":"","children":[]},{"id":141,"label":"Multidrops","url":"","children":[{"id":142,"label":"GE","url":"","children":[]},{"id":143,"label":"UK","url":"","children":[]}]}]},{"id":131,"label":"Admin","url":"","children":[]}]}]};
+var treeData = {"id":1,"label":"TMS","url":"","children":[{"id":2,"label":"Transport","url":"","children":[{"id":4,"label":"Learning","url":"","children":[{"id":101,"label":"Onboarding","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500757/en-us","children":[]}]},{"id":5,"label":"Planning/projects","url":"","children":[{"id":122,"label":"NO_NER","url":"","children":[]},{"id":123,"label":"RUSH","url":"","children":[]},{"id":124,"label":"Trailer Activities UK","url":"","children":[]}]},{"id":125,"label":"JOBSERVER","url":"","children":[]}]},{"id":3,"label":"Admin","url":"","children":[{"id":6,"label":"Learning","url":"","children":[{"id":106,"label":"Onboarding","url":"","children":[]},{"id":121,"label":"Extra Charges + Stops","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500766/en-us","children":[]},{"id":144,"label":"Distance and Fuel Surcharge","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500776/en-us","children":[]}]},{"id":107,"label":"Projects","url":"","children":[]},{"id":108,"label":"Dashboards","url":"","children":[]}]},{"id":128,"label":"Technical Documentation","url":"","children":[{"id":129,"label":"System","url":"","children":[{"id":132,"label":"Optimization","url":"","children":[{"id":133,"label":"Strategy","url":"","children":[]},{"id":134,"label":"Parameters","url":"","children":[]}]}]},{"id":130,"label":"TP","url":"","children":[{"id":135,"label":"SPOTBUY Process Map","url":"","children":[{"id":136,"label":"TMS","url":"","children":[]},{"id":137,"label":"TNX","url":"","children":[]}]},{"id":138,"label":"LC","url":"","children":[]},{"id":139,"label":"DVA","url":"","children":[]},{"id":140,"label":"DF","url":"","children":[]},{"id":141,"label":"Multidrops","url":"","children":[{"id":142,"label":"GE","url":"","children":[]},{"id":143,"label":"UK","url":"","children":[]}]}]},{"id":131,"label":"Admin","url":"","children":[]}]}]};
 // TREE_DATA_END
 
 var COL_GAP=40, V_GAP=14, PAD_X=60, PAD_Y=60, NODE_H=36;
