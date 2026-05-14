@@ -50,7 +50,7 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
   <button class="tool-btn" id="btn-save">💾 Save as file</button>
   <span class="flash" id="save-msg">✓ Downloaded!</span>
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
-  <span class="flash" id="copy-msg">✓ Copied!</span>
+  <span class="flash" id="copy-msg" style="opacity: 0;">✓ Copied!</span>
   <button class="tool-btn" id="btn-snap">📸 Export as image</button>
   <span class="flash" id="snap-msg">✓ Image saved!</span>
 </div>
@@ -66,21 +66,24 @@ var treeData = {"id":1,"label":"TMS","url":"","children":[{"id":2,"label":"Trans
 // TREE_DATA_END
 
 var COL_GAP=40, V_GAP=14, PAD_X=60, PAD_Y=60, NODE_H=36;
-
-// nextId starts high enough to never clash with existing IDs
-var nextId = 500;
+var nextId = 200;
 
 var svg      = document.getElementById('svg-layer');
 var nodesDiv = document.getElementById('nodes-layer');
 var wrap     = document.getElementById('canvas-wrap');
 var sizer    = document.getElementById('sizer');
 
-// ── Ensure all existing IDs are tracked so nextId never duplicates ────────────
-function maxId(n) {
-  var m = n.id;
-  n.children.forEach(function(c){ m = Math.max(m, maxId(c)); });
-  return m;
+// ── Assign stable _uid to every node at startup (and keep on new nodes) ───────
+// _uid is set ONCE and never changes, so DOM lookup is always correct
+var _uidCounter = 1;
+function ensureUids(n) {
+  if (!n._uid) n._uid = 'u' + (_uidCounter++);
+  n.children.forEach(ensureUids);
 }
+ensureUids(treeData);
+
+// nextId = max existing numeric id + 1
+function maxId(n) { var m=n.id; n.children.forEach(function(c){ m=Math.max(m,maxId(c)); }); return m; }
 nextId = maxId(treeData) + 1;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -146,8 +149,7 @@ function render(){
     var lv=Math.min(node._lv,4);
     var el=document.createElement('div');
     el.className='node lv'+lv;
-    // Use unique DOM attribute — combine id + position in allNodes to avoid duplicate-id confusion
-    el.setAttribute('data-uid', node._uid = node._uid || (node.id+'_'+Math.random().toString(36).slice(2)));
+    el.setAttribute('data-uid', node._uid);  // always stable
     el.style.left=node._x+'px';
     el.style.top='-9999px';
 
@@ -182,7 +184,9 @@ function render(){
     var btnAdd=document.createElement('button');
     btnAdd.className='btn btn-add'; btnAdd.textContent='＋'; btnAdd.title='Add child';
     btnAdd.addEventListener('click',(function(n){ return function(){
-      n.children.push({id:nextId++, label:'New Item', url:'', children:[]});
+      var newNode={id:nextId++, label:'New Item', url:'', children:[]};
+      ensureUids(newNode);  // assign _uid immediately so it's stable from birth
+      n.children.push(newNode);
       render();
     }; })(node));
 
@@ -198,7 +202,7 @@ function render(){
     nodesDiv.appendChild(el);
   });
 
-  // After paint: set correct vertical positions then draw lines
+  // After one paint frame, read actual heights and set correct vertical position
   requestAnimationFrame(function(){
     nodes.forEach(function(node){
       var el=nodesDiv.querySelector('[data-uid="'+node._uid+'"]');
@@ -209,6 +213,7 @@ function render(){
   });
 }
 
+// ── Reposition on label edit (no full DOM rebuild) ────────────────────────────
 function repositionAndRedraw(){
   var lvWidths={};
   collectLevelWidths(treeData,0,lvWidths);
@@ -216,6 +221,9 @@ function repositionAndRedraw(){
   calcSubtreeHeight(treeData);
   placeNodes(treeData,0,PAD_Y,colX);
   var nodes=allNodes(treeData);
+  var maxLv=Object.keys(lvWidths).length-1;
+  var maxX=(colX[maxLv]||PAD_X)+(lvWidths[maxLv]||200)+PAD_X;
+  nodesDiv.style.width=maxX+'px'; svg.setAttribute('width',maxX);
   nodes.forEach(function(node){
     var el=nodesDiv.querySelector('[data-uid="'+node._uid+'"]');
     if(!el) return;
@@ -233,6 +241,7 @@ function drawLines(){
     if(!el) return null;
     var left=parseFloat(el.style.left);
     var top=parseFloat(el.style.top);
+    if(top<-100) return null;  // still off-screen, skip
     return { lx:left, rx:left+el.offsetWidth, cy:top+el.offsetHeight/2 };
   }
   function edges(node){
