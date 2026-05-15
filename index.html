@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" wm-editor-extension-available="true"><head>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TMS Project Tree</title>
@@ -10,7 +11,7 @@ body{ font-family:'Segoe UI',Tahoma,sans-serif; background:#f0f4f8; min-height:1
 h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
 .subtitle{ text-align:center; font-size:12px; color:#64748b; margin-bottom:14px; }
 .subtitle span{ margin:0 10px; }
-#toolbar{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+#toolbar{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
 .tool-btn{ border:none; border-radius:8px; padding:9px 20px; font-size:14px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
 #btn-save{ background:#1e3a5f; color:#fff; } #btn-save:hover{ background:#2563eb; }
 #btn-copy{ background:#fff; color:#1e3a5f; border:2px solid #3b82f6; } #btn-copy:hover{ background:#eff6ff; }
@@ -18,34 +19,33 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
 .flash{ font-size:13px; font-weight:600; opacity:0; transition:opacity .3s; }
 #save-msg{ color:#16a34a; } #copy-msg{ color:#2563eb; } #snap-msg{ color:#7c3aed; }
 
+/* Zoom controls */
+#zoom-bar{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px; }
+.zoom-btn{ border:none; border-radius:8px; width:34px; height:34px; font-size:18px; font-weight:700; cursor:pointer; background:#fff; color:#1e3a5f; border:2px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; line-height:1; }
+.zoom-btn:hover{ background:#eff6ff; border-color:#3b82f6; }
+#zoom-label{ font-size:13px; font-weight:600; color:#64748b; min-width:44px; text-align:center; }
+#btn-zoom-fit{ font-size:12px; width:auto; padding:0 10px; }
+
 /* Legend */
-#legend{ text-align:center; font-size:12px; color:#64748b; margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:20px; }
+#legend{ text-align:center; font-size:12px; color:#64748b; margin-bottom:16px; display:flex; align-items:center; justify-content:center; gap:20px; }
 .legend-dot{ display:inline-flex; align-items:center; gap:6px; }
 .legend-box{ width:18px; height:18px; border-radius:5px; display:inline-block; }
-.legend-box.linked   { background:#fff; border:2px solid #3b82f6; }
-.legend-box.unlinked { background:#fff; border:2px solid #cbd5e1; }
+.legend-box.linked  { background:#fff; border:2px solid #3b82f6; }
+.legend-box.unlinked{ background:#fff; border:2px solid #cbd5e1; }
 
-#canvas-wrap{ position:relative; overflow:auto; }
+#canvas-wrap{ position:relative; overflow:auto; border-radius:10px; }
+#zoom-layer{ transform-origin:0 0; }
 #svg-layer{ position:absolute; top:0; left:0; pointer-events:none; }
 #nodes-layer{ position:relative; }
 .node{ position:absolute; display:inline-flex; align-items:center; gap:5px; border-radius:10px; padding:7px 12px; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.12); white-space:nowrap; }
-
-/* Level 0 & 1 — dark/blue backgrounds, no border change needed */
 .lv0{ background:#1e3a5f; color:#fff; font-size:16px; padding:10px 18px; }
 .lv1{ background:#2563eb; color:#fff; }
-
-/* Level 2 — white nodes */
-.lv2         { background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
-.lv2.no-link { background:#fff; color:#1e3a5f; border:2px solid #cbd5e1; }
-
-/* Level 3 — green nodes */
-.lv3         { background:#f0fdf4; color:#166634; border:2px solid #4ade80; }
-.lv3.no-link { background:#f0fdf4; color:#166634; border:2px solid #bbf7d0; }
-
-/* Level 4 — yellow nodes */
-.lv4         { background:#fefce8; color:#713f12; border:2px solid #facc15; }
-.lv4.no-link { background:#fefce8; color:#713f12; border:2px solid #fef08a; }
-
+.lv2        { background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
+.lv2.no-link{ background:#fff; color:#1e3a5f; border:2px solid #cbd5e1; }
+.lv3        { background:#f0fdf4; color:#166634; border:2px solid #4ade80; }
+.lv3.no-link{ background:#f0fdf4; color:#166634; border:2px solid #bbf7d0; }
+.lv4        { background:#fefce8; color:#713f12; border:2px solid #facc15; }
+.lv4.no-link{ background:#fefce8; color:#713f12; border:2px solid #fef08a; }
 .node-input{ border:none; outline:none; background:transparent; color:inherit; font:inherit; text-align:center; min-width:20px; width:auto; }
 .node-input:focus{ border-bottom:1px dashed rgba(255,255,255,0.5); }
 .lv2 .node-input:focus,.lv3 .node-input:focus,.lv4 .node-input:focus{ border-bottom-color:#3b82f6; }
@@ -74,26 +74,38 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
   <button class="tool-btn" id="btn-save">💾 Save as file</button>
   <span class="flash" id="save-msg">✓ Downloaded!</span>
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
-  <span class="flash" id="copy-msg" style="opacity: 0;">✓ Copied!</span>
+  <span class="flash" id="copy-msg">✓ Copied!</span>
   <button class="tool-btn" id="btn-snap">📸 Export as image</button>
-  <span class="flash" id="snap-msg" style="opacity: 0;">✓ Image saved!</span>
+  <span class="flash" id="snap-msg">✓ Image saved!</span>
 </div>
-<div id="canvas-wrap" style="height: 711px;">
-  <svg id="svg-layer" width="1489" height="1556"></svg>
-  <div id="nodes-layer" style="width: 1489px; height: 1556px;"></div>
+<div id="zoom-bar">
+  <button class="zoom-btn" id="btn-zoom-out">−</button>
+  <span id="zoom-label">100%</span>
+  <button class="zoom-btn" id="btn-zoom-in">+</button>
+  <button class="zoom-btn" id="btn-zoom-fit">Fit</button>
 </div>
-<span id="sizer" style="font-size: 14px;">Admin</span>
+<div id="canvas-wrap">
+  <div id="zoom-layer">
+    <svg id="svg-layer"></svg>
+    <div id="nodes-layer"></div>
+  </div>
+</div>
+<span id="sizer"></span>
 
 <script>
 // TREE_DATA_START
-var treeData = {"id":1,"label":"TMS","url":"","children":[{"id":2,"label":"Transport","url":"","children":[{"id":4,"label":"Learning","url":"","children":[{"id":101,"label":"Onboarding","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500757/en-us","children":[]}]},{"id":5,"label":"Planning/projects","url":"","children":[{"id":122,"label":"NO_NER","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500805/en-us","children":[]},{"id":123,"label":"RUSH","url":"","children":[]},{"id":124,"label":"Trailer Activities UK","url":"","children":[]}]},{"id":125,"label":"JOBSERVER","url":"","children":[{"id":152,"label":"UK Jobs","url":"","children":[]},{"id":153,"label":"GE Jobs","url":"","children":[]},{"id":154,"label":"NL Jobs","url":"","children":[]},{"id":155,"label":"BE Jobs","url":"","children":[]},{"id":156,"label":"FR Jobs","url":"","children":[]}]}]},{"id":3,"label":"Admin","url":"","children":[{"id":6,"label":"Learning","url":"","children":[{"id":106,"label":"Onboarding","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500802/en-us","children":[]},{"id":121,"label":"Extra Charges + Stops","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500766/en-us","children":[]},{"id":144,"label":"Distance and Fuel Surcharge","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500776/en-us","children":[]},{"id":145,"label":"Tariff and Master Data","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500780/en-us","children":[]},{"id":147,"label":"Rating Issues guide","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500792/en-us","children":[]},{"id":148,"label":"Self Billing issues and output","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500796/en-us","children":[]},{"id":149,"label":"Billing Proposal guide","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500799/en-us","children":[]},{"id":151,"label":"Zone Creation via Template","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500801/en-us","children":[]}]},{"id":107,"label":"Projects","url":"","children":[]},{"id":108,"label":"Dashboards","url":"","children":[]}]},{"id":128,"label":"Technical Documentation","url":"","children":[{"id":129,"label":"System","url":"","children":[{"id":132,"label":"Optimization","url":"","children":[{"id":133,"label":"Strategy","url":"","children":[]},{"id":134,"label":"Parameters","url":"","children":[]}]}]},{"id":130,"label":"TP","url":"","children":[{"id":135,"label":"SPOTBUY Process Map","url":"","children":[{"id":136,"label":"TMS","url":"","children":[]},{"id":137,"label":"TNX","url":"","children":[]}]},{"id":138,"label":"LC","url":"","children":[]},{"id":139,"label":"DVA","url":"","children":[]},{"id":140,"label":"DF","url":"","children":[]},{"id":141,"label":"Multidrops","url":"","children":[{"id":142,"label":"GE","url":"","children":[]},{"id":143,"label":"UK","url":"","children":[]}]}]},{"id":131,"label":"Admin","url":"","children":[]}]}]};
+var treeData = {"id":1,"label":"TMS","url":"","children":[{"id":2,"label":"Transport","url":"","children":[{"id":4,"label":"Learning","url":"","children":[{"id":101,"label":"Onboarding","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500757/en-us","children":[]}]},{"id":5,"label":"Planning/projects","url":"","children":[{"id":122,"label":"NO_NER","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500805/en-us","children":[]},{"id":123,"label":"RUSH","url":"","children":[]},{"id":124,"label":"Trailer Activities UK","url":"","children":[]}]},{"id":125,"label":"JOBSERVER","url":"","children":[]}]},{"id":3,"label":"Admin","url":"","children":[{"id":6,"label":"Learning","url":"","children":[{"id":106,"label":"Onboarding","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500802/en-us","children":[]},{"id":121,"label":"Extra Charges + Stops","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500766/en-us","children":[]},{"id":144,"label":"Distance and Fuel Surcharge","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500776/en-us","children":[]},{"id":145,"label":"Tariff and Master Data","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500780/en-us","children":[]},{"id":147,"label":"Rating Issues guide","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500792/en-us","children":[]},{"id":148,"label":"Self Billing issues and output","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500796/en-us","children":[]},{"id":149,"label":"Billing Proposal guide","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500799/en-us","children":[]},{"id":151,"label":"Zone Creation via Template","url":"https://ab-inbev.acadia.sysalli.com/browse/ZLOG-500801/en-us","children":[]}]},{"id":107,"label":"Projects","url":"","children":[]},{"id":108,"label":"Dashboards","url":"","children":[]}]},{"id":128,"label":"Technical Documentation","url":"","children":[{"id":129,"label":"System","url":"","children":[{"id":132,"label":"Optimization","url":"","children":[{"id":133,"label":"Strategy","url":"","children":[]},{"id":134,"label":"Parameters","url":"","children":[]}]}]},{"id":130,"label":"TP","url":"","children":[{"id":135,"label":"SPOTBUY Process Map","url":"","children":[{"id":136,"label":"TMS","url":"","children":[]},{"id":137,"label":"TNX","url":"","children":[]}]},{"id":138,"label":"LC","url":"","children":[]},{"id":139,"label":"DVA","url":"","children":[]},{"id":140,"label":"DF","url":"","children":[]},{"id":141,"label":"Multidrops","url":"","children":[{"id":142,"label":"GE","url":"","children":[]},{"id":143,"label":"UK","url":"","children":[]}]}]},{"id":131,"label":"Admin","url":"","children":[]}]}]};
 // TREE_DATA_END
 
 var COL_GAP=40, V_GAP=14, PAD_X=60, PAD_Y=60, NODE_H=36;
-var nextId = 200;
+var nextId=200;
+var currentZoom=1.0;
+var ZOOM_STEP=0.1, ZOOM_MIN=0.3, ZOOM_MAX=2.0;
+
 var svg=document.getElementById('svg-layer');
 var nodesDiv=document.getElementById('nodes-layer');
 var wrap=document.getElementById('canvas-wrap');
+var zoomLayer=document.getElementById('zoom-layer');
 var sizer=document.getElementById('sizer');
 
 var _uidCounter=1;
@@ -102,6 +114,37 @@ ensureUids(treeData);
 function maxId(n){ var m=n.id; n.children.forEach(function(c){ m=Math.max(m,maxId(c)); }); return m; }
 nextId=maxId(treeData)+1;
 
+// ── Zoom ──────────────────────────────────────────────────────────────────────
+function applyZoom(z) {
+  currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
+  zoomLayer.style.transform = 'scale('+currentZoom+')';
+  // Update wrap height to fit scaled content
+  var baseH = parseInt(nodesDiv.style.height)||400;
+  wrap.style.height = Math.min(baseH*currentZoom+4, window.innerHeight-260)+'px';
+  document.getElementById('zoom-label').textContent = Math.round(currentZoom*100)+'%';
+}
+
+function fitZoom() {
+  var treeW = parseInt(nodesDiv.style.width)||800;
+  var treeH = parseInt(nodesDiv.style.height)||400;
+  var availW = wrap.parentElement.clientWidth - 40;
+  var availH = window.innerHeight - 300;
+  var z = Math.min(availW/treeW, availH/treeH, 1.0);
+  applyZoom(Math.floor(z*10)/10);
+}
+
+document.getElementById('btn-zoom-in').addEventListener('click', function(){ applyZoom(currentZoom+ZOOM_STEP); });
+document.getElementById('btn-zoom-out').addEventListener('click', function(){ applyZoom(currentZoom-ZOOM_STEP); });
+document.getElementById('btn-zoom-fit').addEventListener('click', fitZoom);
+
+// Ctrl+scroll to zoom
+wrap.addEventListener('wheel', function(e){
+  if (!e.ctrlKey) return;
+  e.preventDefault();
+  applyZoom(currentZoom + (e.deltaY<0 ? ZOOM_STEP : -ZOOM_STEP));
+}, {passive:false});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function measureText(text,lv){ sizer.style.fontSize=(lv===0?16:14)+'px'; sizer.textContent=text||' '; return sizer.offsetWidth+130; }
 function fitInput(inp,lv){ sizer.style.fontSize=(lv===0?16:14)+'px'; sizer.textContent=inp.value||' '; inp.style.width=Math.max(sizer.offsetWidth,20)+'px'; }
 function allNodes(n,a){ a=a||[]; a.push(n); n.children.forEach(function(c){ allNodes(c,a); }); return a; }
@@ -112,6 +155,7 @@ function buildColX(map){ var colX=[PAD_X],maxLv=Object.keys(map).length; for(var
 function calcSubtreeHeight(n){ if(!n.children.length){ n._sh=NODE_H; return; } n.children.forEach(calcSubtreeHeight); var total=n.children.reduce(function(s,c){ return s+c._sh; },0)+V_GAP*(n.children.length-1); n._sh=Math.max(NODE_H,total); }
 function placeNodes(n,lv,yTop,colX){ n._lv=lv; n._x=colX[lv]; n._cy=yTop+n._sh/2; if(!n.children.length) return; var y=yTop; n.children.forEach(function(c){ placeNodes(c,lv+1,y,colX); y+=c._sh+V_GAP; }); }
 
+// ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   nodesDiv.innerHTML=''; svg.innerHTML='';
   var lvWidths={};
@@ -126,13 +170,12 @@ function render(){
   nodes.forEach(function(n){ maxY=Math.max(maxY,n._cy+NODE_H/2+PAD_Y); });
   nodesDiv.style.width=maxX+'px'; nodesDiv.style.height=maxY+'px';
   svg.setAttribute('width',maxX); svg.setAttribute('height',maxY);
-  wrap.style.height=Math.min(maxY+4,window.innerHeight-200)+'px';
+  applyZoom(currentZoom);
 
   nodes.forEach(function(node){
     var lv=Math.min(node._lv,4);
     var el=document.createElement('div');
-    // Apply no-link class for levels 2+ that have no URL
-    var noLinkClass = (lv>=2 && !node.url) ? ' no-link' : '';
+    var noLinkClass=(lv>=2&&!node.url)?' no-link':'';
     el.className='node lv'+lv+noLinkClass;
     el.setAttribute('data-uid',node._uid);
     el.style.left=node._x+'px';
@@ -167,9 +210,7 @@ function render(){
     btnAdd.className='btn btn-add'; btnAdd.textContent='＋'; btnAdd.title='Add child';
     btnAdd.addEventListener('click',(function(n){ return function(){
       var newNode={id:nextId++,label:'New Item',url:'',children:[]};
-      ensureUids(newNode);
-      n.children.push(newNode);
-      render();
+      ensureUids(newNode); n.children.push(newNode); render();
     }; })(node));
 
     var btnDel=document.createElement('button');
@@ -217,8 +258,7 @@ function drawLines(){
   function getCoords(node){
     var el=nodesDiv.querySelector('[data-uid="'+node._uid+'"]');
     if(!el) return null;
-    var left=parseFloat(el.style.left);
-    var top=parseFloat(el.style.top);
+    var left=parseFloat(el.style.left), top=parseFloat(el.style.top);
     if(top<-100) return null;
     return { lx:left, rx:left+el.offsetWidth, cy:top+el.offsetHeight/2 };
   }
@@ -229,12 +269,8 @@ function drawLines(){
     if(!crs.length) return;
     var midX=pr.rx+(crs[0].lx-pr.rx)/2;
     line(pr.rx,pr.cy,midX,pr.cy);
-    if(crs.length===1){
-      line(midX,crs[0].cy,crs[0].lx,crs[0].cy);
-    } else {
-      line(midX,crs[0].cy,midX,crs[crs.length-1].cy);
-      crs.forEach(function(cr){ line(midX,cr.cy,cr.lx,cr.cy); });
-    }
+    if(crs.length===1){ line(midX,crs[0].cy,crs[0].lx,crs[0].cy); }
+    else { line(midX,crs[0].cy,midX,crs[crs.length-1].cy); crs.forEach(function(cr){ line(midX,cr.cy,cr.lx,cr.cy); }); }
     node.children.forEach(edges);
   }
   edges(treeData);
@@ -247,7 +283,7 @@ function line(x1,y1,x2,y2){
   svg.appendChild(l);
 }
 
-// ── Snapshot ──────────────────────────────────────────────────────────────────
+// ── Snapshot (always at 100% zoom, full tree) ─────────────────────────────────
 document.getElementById('btn-snap').addEventListener('click',function(){
   var btns=nodesDiv.querySelectorAll('.btn');
   btns.forEach(function(b){ b.style.display='none'; });
@@ -302,6 +338,7 @@ document.getElementById('btn-snap').addEventListener('click',function(){
   });
 });
 
+// ── Export HTML ───────────────────────────────────────────────────────────────
 function buildExport(){
   var clone=document.documentElement.cloneNode(true);
   var cn=clone.querySelector('#nodes-layer'); if(cn) cn.innerHTML='';
@@ -332,6 +369,5 @@ wrap.addEventListener('scroll',drawLines);
 window.addEventListener('resize',render);
 render();
 </script>
-
-
-</body></html>
+</body>
+</html>
