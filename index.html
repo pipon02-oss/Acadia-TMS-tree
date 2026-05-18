@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html wm-editor-extension-available="true" lang="en"><head></head><body>d
-
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TMS Project Tree</title>
@@ -18,26 +18,34 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
 #btn-snap{ background:#7c3aed; color:#fff; } #btn-snap:hover{ background:#6d28d9; }
 .flash{ font-size:13px; font-weight:600; opacity:0; transition:opacity .3s; }
 #save-msg{ color:#16a34a; } #copy-msg{ color:#2563eb; } #snap-msg{ color:#7c3aed; }
-
-/* Zoom controls */
 #zoom-bar{ display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px; }
-.zoom-btn{ border:none; border-radius:8px; width:34px; height:34px; font-size:18px; font-weight:700; cursor:pointer; background:#fff; color:#1e3a5f; border:2px solid #e2e8f0; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; line-height:1; }
+.zoom-btn{ border:2px solid #e2e8f0; border-radius:8px; width:34px; height:34px; font-size:18px; font-weight:700; cursor:pointer; background:#fff; color:#1e3a5f; box-shadow:0 1px 4px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; line-height:1; }
 .zoom-btn:hover{ background:#eff6ff; border-color:#3b82f6; }
 #zoom-label{ font-size:13px; font-weight:600; color:#64748b; min-width:44px; text-align:center; }
 #btn-zoom-fit{ font-size:12px; width:auto; padding:0 10px; }
-
-/* Legend */
 #legend{ text-align:center; font-size:12px; color:#64748b; margin-bottom:16px; display:flex; align-items:center; justify-content:center; gap:20px; }
 .legend-dot{ display:inline-flex; align-items:center; gap:6px; }
 .legend-box{ width:18px; height:18px; border-radius:5px; display:inline-block; }
 .legend-box.linked  { background:#fff; border:2px solid #3b82f6; }
 .legend-box.unlinked{ background:#fff; border:2px solid #cbd5e1; }
-
 #canvas-wrap{ position:relative; overflow:auto; border-radius:10px; }
 #zoom-layer{ transform-origin:0 0; }
 #svg-layer{ position:absolute; top:0; left:0; pointer-events:none; }
 #nodes-layer{ position:relative; }
-.node{ position:absolute; display:inline-flex; align-items:center; gap:5px; border-radius:10px; padding:7px 12px; font-weight:600; font-size:14px; box-shadow:0 2px 8px rgba(0,0,0,0.12); white-space:nowrap; }
+.node{
+  position:absolute; display:inline-flex; align-items:center; gap:5px;
+  border-radius:10px; padding:7px 12px; font-weight:600; font-size:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.12); white-space:nowrap;
+  transition: box-shadow 0.15s;
+}
+.node.dragging{
+  box-shadow:0 8px 24px rgba(0,0,0,0.22);
+  opacity:0.85;
+  z-index:1000;
+  cursor:grabbing !important;
+}
+.node.drop-above{ border-top: 3px solid #2563eb !important; }
+.node.drop-below{ border-bottom: 3px solid #2563eb !important; }
 .lv0{ background:#1e3a5f; color:#fff; font-size:16px; padding:10px 18px; }
 .lv1{ background:#2563eb; color:#fff; }
 .lv2        { background:#fff; color:#1e3a5f; border:2px solid #3b82f6; }
@@ -51,20 +59,23 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
 .lv2 .node-input:focus,.lv3 .node-input:focus,.lv4 .node-input:focus{ border-bottom-color:#3b82f6; }
 .btn{ background:none; border:none; cursor:pointer; font-size:13px; padding:1px 4px; border-radius:4px; opacity:.75; line-height:1; }
 .btn:hover{ opacity:1; }
+.btn-drag{ cursor:grab; font-size:14px; opacity:0.4; }
+.btn-drag:hover{ opacity:0.8; }
 .btn-add{ color:#86efac; }
 .lv2 .btn-add,.lv3 .btn-add,.lv4 .btn-add{ color:#2563eb; }
 .btn-del{ color:#fca5a5; }
 .lv2 .btn-del,.lv3 .btn-del,.lv4 .btn-del{ color:#ef4444; }
 #sizer{ position:absolute; visibility:hidden; white-space:pre; font-weight:600; font-size:14px; font-family:'Segoe UI',Tahoma,sans-serif; top:-9999px; left:-9999px; }
 </style>
-
-
+</head>
+<body>
 <h1>📋 TMS Project Tree</h1>
 <div class="subtitle">
-  <span>✏️ Rename node</span>
-  <span>🔗 Add/Open links</span>
+  <span>✏️ Rename</span>
+  <span>⠿ Drag to reorder</span>
+  <span>🔗 Link</span>
   <span>➕ Add child</span>
-  <span>🗑️ Delete node</span>
+  <span>🗑️ Delete</span>
 </div>
 <div id="legend">
   <div class="legend-dot"><span class="legend-box linked"></span> Has link</div>
@@ -74,7 +85,7 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
   <button class="tool-btn" id="btn-save">💾 Save as file</button>
   <span class="flash" id="save-msg">✓ Downloaded!</span>
   <button class="tool-btn" id="btn-copy">📋 Copy to clipboard</button>
-  <span class="flash" id="copy-msg" style="opacity: 0;">✓ Copied!</span>
+  <span class="flash" id="copy-msg">✓ Copied!</span>
   <button class="tool-btn" id="btn-snap">📸 Export as image</button>
   <span class="flash" id="snap-msg">✓ Image saved!</span>
 </div>
@@ -84,13 +95,13 @@ h1{ text-align:center; color:#1e3a5f; margin-bottom:6px; font-size:22px; }
   <button class="zoom-btn" id="btn-zoom-in">+</button>
   <button class="zoom-btn" id="btn-zoom-fit">Fit</button>
 </div>
-<div id="canvas-wrap" style="height: 771px;">
-  <div id="zoom-layer" style="transform: scale(1);">
-    <svg id="svg-layer" width="1489" height="1406"></svg>
-    <div id="nodes-layer" style="width: 1489px; height: 1406px;"></div>
+<div id="canvas-wrap">
+  <div id="zoom-layer">
+    <svg id="svg-layer"></svg>
+    <div id="nodes-layer"></div>
   </div>
 </div>
-<span id="sizer" style="font-size: 14px;">Admin</span>
+<span id="sizer"></span>
 
 <script>
 // TREE_DATA_START
@@ -98,51 +109,46 @@ var treeData = {"id":1,"label":"TMS","url":"","children":[{"id":2,"label":"Trans
 // TREE_DATA_END
 
 var COL_GAP=40, V_GAP=14, PAD_X=60, PAD_Y=60, NODE_H=36;
-var nextId=200;
-var currentZoom=1.0;
-var ZOOM_STEP=0.1, ZOOM_MIN=0.3, ZOOM_MAX=2.0;
-
+var nextId=200, currentZoom=1.0, ZOOM_STEP=0.1, ZOOM_MIN=0.3, ZOOM_MAX=2.0;
 var svg=document.getElementById('svg-layer');
 var nodesDiv=document.getElementById('nodes-layer');
 var wrap=document.getElementById('canvas-wrap');
 var zoomLayer=document.getElementById('zoom-layer');
 var sizer=document.getElementById('sizer');
 
+// ── UIDs ──────────────────────────────────────────────────────────────────────
 var _uidCounter=1;
 function ensureUids(n){ if(!n._uid) n._uid='u'+(_uidCounter++); n.children.forEach(ensureUids); }
 ensureUids(treeData);
 function maxId(n){ var m=n.id; n.children.forEach(function(c){ m=Math.max(m,maxId(c)); }); return m; }
 nextId=maxId(treeData)+1;
 
-// ── Zoom ──────────────────────────────────────────────────────────────────────
-function applyZoom(z) {
-  currentZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
-  zoomLayer.style.transform = 'scale('+currentZoom+')';
-  // Update wrap height to fit scaled content
-  var baseH = parseInt(nodesDiv.style.height)||400;
-  wrap.style.height = Math.min(baseH*currentZoom+4, window.innerHeight-260)+'px';
-  document.getElementById('zoom-label').textContent = Math.round(currentZoom*100)+'%';
+// ── Parent lookup map (uid → parent node) ─────────────────────────────────────
+var parentMap={};
+function buildParentMap(n){
+  n.children.forEach(function(c){ parentMap[c._uid]=n; buildParentMap(c); });
 }
 
-function fitZoom() {
-  var treeW = parseInt(nodesDiv.style.width)||800;
-  var treeH = parseInt(nodesDiv.style.height)||400;
-  var availW = wrap.parentElement.clientWidth - 40;
-  var availH = window.innerHeight - 300;
-  var z = Math.min(availW/treeW, availH/treeH, 1.0);
+// ── Zoom ──────────────────────────────────────────────────────────────────────
+function applyZoom(z){
+  currentZoom=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN,z));
+  zoomLayer.style.transform='scale('+currentZoom+')';
+  var baseH=parseInt(nodesDiv.style.height)||400;
+  wrap.style.height=Math.min(baseH*currentZoom+4,window.innerHeight-260)+'px';
+  document.getElementById('zoom-label').textContent=Math.round(currentZoom*100)+'%';
+}
+function fitZoom(){
+  var treeW=parseInt(nodesDiv.style.width)||800;
+  var treeH=parseInt(nodesDiv.style.height)||400;
+  var availW=wrap.parentElement.clientWidth-40;
+  var availH=window.innerHeight-300;
+  var z=Math.min(availW/treeW,availH/treeH,1.0);
   applyZoom(Math.floor(z*10)/10);
 }
-
-document.getElementById('btn-zoom-in').addEventListener('click', function(){ applyZoom(currentZoom+ZOOM_STEP); });
-document.getElementById('btn-zoom-out').addEventListener('click', function(){ applyZoom(currentZoom-ZOOM_STEP); });
-document.getElementById('btn-zoom-fit').addEventListener('click', fitZoom);
-
-// Ctrl+scroll to zoom
-wrap.addEventListener('wheel', function(e){
-  if (!e.ctrlKey) return;
-  e.preventDefault();
-  applyZoom(currentZoom + (e.deltaY<0 ? ZOOM_STEP : -ZOOM_STEP));
-}, {passive:false});
+document.getElementById('btn-zoom-in').addEventListener('click',function(){ applyZoom(currentZoom+ZOOM_STEP); });
+document.getElementById('btn-zoom-out').addEventListener('click',function(){ applyZoom(currentZoom-ZOOM_STEP); });
+document.getElementById('btn-zoom-fit').addEventListener('click',fitZoom);
+wrap.addEventListener('wheel',function(e){ if(!e.ctrlKey) return; e.preventDefault(); applyZoom(currentZoom+(e.deltaY<0?ZOOM_STEP:-ZOOM_STEP)); },{passive:false});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function measureText(text,lv){ sizer.style.fontSize=(lv===0?16:14)+'px'; sizer.textContent=text||' '; return sizer.offsetWidth+130; }
@@ -155,9 +161,125 @@ function buildColX(map){ var colX=[PAD_X],maxLv=Object.keys(map).length; for(var
 function calcSubtreeHeight(n){ if(!n.children.length){ n._sh=NODE_H; return; } n.children.forEach(calcSubtreeHeight); var total=n.children.reduce(function(s,c){ return s+c._sh; },0)+V_GAP*(n.children.length-1); n._sh=Math.max(NODE_H,total); }
 function placeNodes(n,lv,yTop,colX){ n._lv=lv; n._x=colX[lv]; n._cy=yTop+n._sh/2; if(!n.children.length) return; var y=yTop; n.children.forEach(function(c){ placeNodes(c,lv+1,y,colX); y+=c._sh+V_GAP; }); }
 
+// ── Drag state ────────────────────────────────────────────────────────────────
+var drag = {
+  active: false,
+  node: null,       // data node being dragged
+  el: null,         // DOM element being dragged
+  startY: 0,        // mousedown Y in page coords
+  origTop: 0,       // original CSS top of element
+  overUid: null,    // uid of node we're hovering
+  overPos: null     // 'above' or 'below'
+};
+
+function clearDropIndicators(){
+  nodesDiv.querySelectorAll('.drop-above,.drop-below').forEach(function(e){
+    e.classList.remove('drop-above','drop-below');
+  });
+}
+
+function startDrag(e, node, el){
+  // Don't drag the root
+  if(node.id===treeData.id) return;
+  e.preventDefault();
+  drag.active=true;
+  drag.node=node;
+  drag.el=el;
+  drag.startY=e.clientY;
+  drag.origTop=parseFloat(el.style.top);
+  el.classList.add('dragging');
+  document.addEventListener('mousemove',onDragMove);
+  document.addEventListener('mouseup',onDragEnd);
+}
+
+function onDragMove(e){
+  if(!drag.active) return;
+  var dy=(e.clientY-drag.startY)/currentZoom;
+  drag.el.style.top=(drag.origTop+dy)+'px';
+
+  // Find which node we're hovering over (same parent only)
+  var parent=parentMap[drag.node._uid];
+  if(!parent) return;
+
+  clearDropIndicators();
+  drag.overUid=null; drag.overPos=null;
+
+  var dragCY=parseFloat(drag.el.style.top)+drag.el.offsetHeight/2;
+
+  parent.children.forEach(function(sibling){
+    if(sibling._uid===drag.node._uid) return;
+    var sibEl=nodesDiv.querySelector('[data-uid="'+sibling._uid+'"]');
+    if(!sibEl) return;
+    var sibTop=parseFloat(sibEl.style.top);
+    var sibBot=sibTop+sibEl.offsetHeight;
+    var sibCY=(sibTop+sibBot)/2;
+    if(dragCY<sibCY){
+      if(!drag.overUid || sibling._cy < parentMap[drag.node._uid].children.find(function(c){ return c._uid===drag.overUid; })._cy){
+        drag.overUid=sibling._uid; drag.overPos='above';
+      }
+    } else {
+      if(!drag.overUid || sibling._cy > parentMap[drag.node._uid].children.find(function(c){ return c._uid===drag.overUid; })._cy){
+        drag.overUid=sibling._uid; drag.overPos='below';
+      }
+    }
+  });
+
+  // Find the nearest sibling
+  var bestDist=Infinity;
+  parent.children.forEach(function(sibling){
+    if(sibling._uid===drag.node._uid) return;
+    var sibEl=nodesDiv.querySelector('[data-uid="'+sibling._uid+'"]');
+    if(!sibEl) return;
+    var sibCY=parseFloat(sibEl.style.top)+sibEl.offsetHeight/2;
+    var dist=Math.abs(dragCY-sibCY);
+    if(dist<bestDist){
+      bestDist=dist;
+      drag.overUid=sibling._uid;
+      drag.overPos=dragCY<sibCY?'above':'below';
+    }
+  });
+
+  if(drag.overUid){
+    var overEl=nodesDiv.querySelector('[data-uid="'+drag.overUid+'"]');
+    if(overEl) overEl.classList.add(drag.overPos==='above'?'drop-above':'drop-below');
+  }
+}
+
+function onDragEnd(){
+  if(!drag.active) return;
+  document.removeEventListener('mousemove',onDragMove);
+  document.removeEventListener('mouseup',onDragEnd);
+  drag.el.classList.remove('dragging');
+  clearDropIndicators();
+
+  // Reorder if we have a valid drop target
+  if(drag.overUid && drag.overPos){
+    var parent=parentMap[drag.node._uid];
+    if(parent){
+      // Remove dragged node from children
+      var arr=parent.children;
+      var fromIdx=arr.findIndex(function(c){ return c._uid===drag.node._uid; });
+      var toIdx=arr.findIndex(function(c){ return c._uid===drag.overUid; });
+      if(fromIdx!==-1 && toIdx!==-1){
+        arr.splice(fromIdx,1);
+        // Recalculate toIdx after removal
+        toIdx=arr.findIndex(function(c){ return c._uid===drag.overUid; });
+        var insertAt=drag.overPos==='above'?toIdx:toIdx+1;
+        arr.splice(insertAt,0,drag.node);
+      }
+    }
+  }
+
+  drag.active=false; drag.node=null; drag.el=null; drag.overUid=null; drag.overPos=null;
+  render();
+}
+
 // ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   nodesDiv.innerHTML=''; svg.innerHTML='';
+  parentMap={};
+  buildParentMap(treeData);
+
   var lvWidths={};
   collectLevelWidths(treeData,0,lvWidths);
   var colX=buildColX(lvWidths);
@@ -181,6 +303,16 @@ function render(){
     el.style.left=node._x+'px';
     el.style.top='-9999px';
 
+    // Drag handle — only for non-root nodes that have siblings
+    if(node.id!==treeData.id){
+      var btnDrag=document.createElement('button');
+      btnDrag.className='btn btn-drag'; btnDrag.textContent='⠿'; btnDrag.title='Drag to reorder';
+      btnDrag.addEventListener('mousedown',(function(n,e_){ return function(e){
+        startDrag(e,n,e_.closest('.node'));
+      }; })(node,el));
+      el.appendChild(btnDrag);
+    }
+
     var inp=document.createElement('input');
     inp.className='node-input'; inp.value=node.label;
     fitInput(inp,node._lv);
@@ -188,6 +320,7 @@ function render(){
       n.label=i.value; fitInput(i,n._lv);
       requestAnimationFrame(function(){ requestAnimationFrame(repositionAndRedraw); });
     }; })(node,inp));
+    el.appendChild(inp);
 
     var btnLink=document.createElement('button');
     btnLink.className='btn'; btnLink.innerHTML='🔗'; btnLink.title='Open / Edit link';
@@ -205,6 +338,7 @@ function render(){
       if(!/^https?:\/\//i.test(newUrl)) newUrl='https://'+newUrl;
       n.url=newUrl; btn.style.opacity='1'; render();
     }; })(node,btnLink));
+    el.appendChild(btnLink);
 
     var btnAdd=document.createElement('button');
     btnAdd.className='btn btn-add'; btnAdd.textContent='＋'; btnAdd.title='Add child';
@@ -212,6 +346,7 @@ function render(){
       var newNode={id:nextId++,label:'New Item',url:'',children:[]};
       ensureUids(newNode); n.children.push(newNode); render();
     }; })(node));
+    el.appendChild(btnAdd);
 
     var btnDel=document.createElement('button');
     btnDel.className='btn btn-del'; btnDel.textContent='×'; btnDel.title='Delete';
@@ -219,8 +354,8 @@ function render(){
     btnDel.addEventListener('click',(function(n){ return function(){
       if(n.id===treeData.id) return; removeNode(treeData,n.id); render();
     }; })(node));
+    el.appendChild(btnDel);
 
-    el.appendChild(inp); el.appendChild(btnLink); el.appendChild(btnAdd); el.appendChild(btnDel);
     nodesDiv.appendChild(el);
   });
 
@@ -270,7 +405,7 @@ function drawLines(){
     var midX=pr.rx+(crs[0].lx-pr.rx)/2;
     line(pr.rx,pr.cy,midX,pr.cy);
     if(crs.length===1){ line(midX,crs[0].cy,crs[0].lx,crs[0].cy); }
-    else { line(midX,crs[0].cy,midX,crs[crs.length-1].cy); crs.forEach(function(cr){ line(midX,cr.cy,cr.lx,cr.cy); }); }
+    else{ line(midX,crs[0].cy,midX,crs[crs.length-1].cy); crs.forEach(function(cr){ line(midX,cr.cy,cr.lx,cr.cy); }); }
     node.children.forEach(edges);
   }
   edges(treeData);
@@ -283,7 +418,7 @@ function line(x1,y1,x2,y2){
   svg.appendChild(l);
 }
 
-// ── Snapshot (always at 100% zoom, full tree) ─────────────────────────────────
+// ── Snapshot ──────────────────────────────────────────────────────────────────
 document.getElementById('btn-snap').addEventListener('click',function(){
   var btns=nodesDiv.querySelectorAll('.btn');
   btns.forEach(function(b){ b.style.display='none'; });
@@ -322,7 +457,7 @@ document.getElementById('btn-snap').addEventListener('click',function(){
     var midX=pr.rx+(crs[0].lx-pr.rx)/2;
     addLine(pr.rx,pr.cy,midX,pr.cy);
     if(crs.length===1){ addLine(midX,crs[0].cy,crs[0].lx,crs[0].cy); }
-    else { addLine(midX,crs[0].cy,midX,crs[crs.length-1].cy); crs.forEach(function(cr){ addLine(midX,cr.cy,cr.lx,cr.cy); }); }
+    else{ addLine(midX,crs[0].cy,midX,crs[crs.length-1].cy); crs.forEach(function(cr){ addLine(midX,cr.cy,cr.lx,cr.cy); }); }
     node.children.forEach(edges);
   }
   edges(treeData);
@@ -338,7 +473,6 @@ document.getElementById('btn-snap').addEventListener('click',function(){
   });
 });
 
-// ── Export HTML ───────────────────────────────────────────────────────────────
 function buildExport(){
   var clone=document.documentElement.cloneNode(true);
   var cn=clone.querySelector('#nodes-layer'); if(cn) cn.innerHTML='';
@@ -369,9 +503,5 @@ wrap.addEventListener('scroll',drawLines);
 window.addEventListener('resize',render);
 render();
 </script>
-
-
-
-
-
-</body></html>
+</body>
+</html>
